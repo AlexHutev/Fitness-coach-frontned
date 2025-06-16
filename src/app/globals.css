@@ -129,6 +129,13 @@ body {
   @apply active:scale-95;
 }
 
+.btn-danger {
+  @apply bg-red-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200;
+  @apply hover:bg-red-700 hover:shadow-lg hover:scale-105;
+  @apply focus:outline-none focus:ring-4 focus:ring-red-200;
+  @apply active:scale-95;
+}
+
 /* Card animations */
 .card-hover {
   @apply transition-all duration-300 ease-out;
