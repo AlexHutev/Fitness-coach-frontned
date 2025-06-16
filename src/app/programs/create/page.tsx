@@ -1,3 +1,127 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Save, Plus, X } from 'lucide-react';
+import { withAuth } from '@/context/AuthContext';
+import { ProgramService } from '@/services/programs';
+import { CreateProgram, WorkoutDay, ProgramType, DifficultyLevel } from '@/types/api';
+
+function CreateProgramPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  
+  const [program, setProgram] = useState<CreateProgram>({
+    name: '',
+    description: '',
+    program_type: 'strength',
+    difficulty_level: 'beginner',
+    duration_weeks: 4,
+    sessions_per_week: 3,
+    workout_structure: [],
+    tags: '',
+    equipment_needed: [],
+    is_template: true
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!program.name.trim()) return;
+
+    try {
+      setLoading(true);
+      await ProgramService.createProgram(program);
+      router.push('/programs');
+    } catch (error) {
+      console.error('Error creating program:', error);
+      alert('Failed to create program. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  const addWorkoutDay = () => {
+    const newDay: WorkoutDay = {
+      day: program.workout_structure.length + 1,
+      name: `Day ${program.workout_structure.length + 1}`,
+      exercises: []
+    };
+    setProgram(prev => ({
+      ...prev,
+      workout_structure: [...prev.workout_structure, newDay]
+    }));
+  };
+
+  const removeWorkoutDay = (dayIndex: number) => {
+    setProgram(prev => ({
+      ...prev,
+      workout_structure: prev.workout_structure.filter((_, index) => index !== dayIndex)
+        .map((day, index) => ({ ...day, day: index + 1 }))
+    }));
+  };
+
+  const updateWorkoutDay = (dayIndex: number, updates: Partial<WorkoutDay>) => {
+    setProgram(prev => ({
+      ...prev,
+      workout_structure: prev.workout_structure.map((day, index) => 
+        index === dayIndex ? { ...day, ...updates } : day
+      )
+    }));
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center text-blue-600 hover:text-blue-800 mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Programs
+          </button>
+          <h1 className="text-3xl font-bold text-gray-900">Create New Program</h1>
+          <p className="text-gray-600 mt-2">Design a custom training program</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Program Details</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Program Name *
+                </label>
+                <input
+                  type="text"
+                  value={program.name}
+                  onChange={(e) => setProgram(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., Beginner Strength Training"
+                  required
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={program.description}
+                  onChange={(e) => setProgram(prev => ({ ...prev, description: e.target.value }))}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Brief description of the program..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Program Type
+                </label>
+                <select
+                  value={program.program_type}
+                  onChange={(e) => setProgram(prev => ({ ...prev, program_type: e.target.value as ProgramType }))}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="strength">Strength</option>
@@ -5,6 +129,8 @@
                   <option value="flexibility">Flexibility</option>
                   <option value="mixed">Mixed</option>
                   <option value="rehabilitation">Rehabilitation</option>
+                  <option value="functional">Functional</option>
+                  <option value="sports_specific">Sports Specific</option>
                 </select>
               </div>
 
@@ -14,7 +140,7 @@
                 </label>
                 <select
                   value={program.difficulty_level}
-                  onChange={(e) => setProgram(prev => ({ ...prev, difficulty_level: e.target.value as any }))}
+                  onChange={(e) => setProgram(prev => ({ ...prev, difficulty_level: e.target.value as DifficultyLevel }))}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="beginner">Beginner</option>
@@ -39,7 +165,7 @@
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sessions per Week
+                  Sessions per week
                 </label>
                 <input
                   type="number"
@@ -51,7 +177,20 @@
                 />
               </div>
 
-              <div className="md:col-span-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tags (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={program.tags}
+                  onChange={(e) => setProgram(prev => ({ ...prev, tags: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="beginner, weight-loss, home-workout"
+                />
+              </div>
+
+              <div>
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -69,7 +208,7 @@
           {/* Workout Structure */}
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Workout Structure</h2>
+              <h3 className="text-lg font-semibold text-gray-900">Workout Structure</h3>
               <button
                 type="button"
                 onClick={addWorkoutDay}
@@ -80,115 +219,38 @@
               </button>
             </div>
 
-            <div className="space-y-6">
-              {program.workout_structure.map((day, dayIndex) => (
-                <div key={dayIndex} className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <input
-                      type="text"
-                      value={day.name}
-                      onChange={(e) => updateWorkoutDay(dayIndex, { name: e.target.value })}
-                      className="text-lg font-medium border-none p-0 focus:ring-0 focus:outline-none bg-transparent"
-                      placeholder="Day name"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeWorkoutDay(dayIndex)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
+            {program.workout_structure.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <p>No workout days added yet. Click &quot;Add Day&quot; to get started.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {program.workout_structure.map((day, dayIndex) => (
+                  <div key={dayIndex} className="border rounded-lg p-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <input
+                        type="text"
+                        value={day.name}
+                        onChange={(e) => updateWorkoutDay(dayIndex, { name: e.target.value })}
+                        className="text-lg font-medium bg-transparent border-none outline-none focus:ring-2 focus:ring-blue-500 rounded px-2"
+                        placeholder="Workout day name"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeWorkoutDay(dayIndex)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                    
+                    <div className="text-sm text-gray-600">
+                      Day {day.day} • {day.exercises.length} exercises
+                    </div>
                   </div>
-
-                  <div className="space-y-3">
-                    {day.exercises.map((exercise, exerciseIndex) => (
-                      <div key={exerciseIndex} className="bg-gray-50 rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <h4 className="font-medium text-gray-900">
-                            {getExerciseName(exercise.exercise_id)}
-                          </h4>
-                          <button
-                            type="button"
-                            onClick={() => removeExerciseFromDay(dayIndex, exerciseIndex)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                          <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Sets</label>
-                            <input
-                              type="number"
-                              min="1"
-                              max="20"
-                              value={exercise.sets}
-                              onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, { sets: parseInt(e.target.value) })}
-                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Reps</label>
-                            <input
-                              type="text"
-                              value={exercise.reps}
-                              onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, { reps: e.target.value })}
-                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-                              placeholder="e.g., 10 or 8-12"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Weight</label>
-                            <input
-                              type="text"
-                              value={exercise.weight}
-                              onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, { weight: e.target.value })}
-                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-                              placeholder="e.g., 60kg or bodyweight"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Rest (sec)</label>
-                            <input
-                              type="number"
-                              min="0"
-                              max="600"
-                              value={exercise.rest_seconds}
-                              onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, { rest_seconds: parseInt(e.target.value) })}
-                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="mt-3">
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Notes (optional)</label>
-                          <input
-                            type="text"
-                            value={exercise.notes || ''}
-                            onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, { notes: e.target.value })}
-                            className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500"
-                            placeholder="Any specific instructions..."
-                          />
-                        </div>
-                      </div>
-                    ))}
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedDayIndex(dayIndex);
-                        setShowExerciseSelector(true);
-                      }}
-                      className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 flex items-center justify-center space-x-2"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Add Exercise</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Submit Button */}
@@ -214,80 +276,6 @@
             </button>
           </div>
         </form>
-
-        {/* Exercise Selector Modal */}
-        {showExerciseSelector && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden mx-4">
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Select Exercise</h3>
-                  <button
-                    onClick={() => setShowExerciseSelector(false)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
-                
-                <div className="relative">
-                  <Search className="w-5 h-5 absolute left-3 top-3 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search exercises..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-              
-              <div className="p-6 overflow-y-auto max-h-96">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredExercises.map((exercise) => (
-                    <div
-                      key={exercise.id}
-                      onClick={() => addExerciseToDay(selectedDayIndex, exercise)}
-                      className="border border-gray-200 rounded-lg p-4 hover:bg-blue-50 hover:border-blue-300 cursor-pointer transition-colors"
-                    >
-                      <h4 className="font-medium text-gray-900 mb-2">{exercise.name}</h4>
-                      
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        {exercise.muscle_groups?.map((group) => (
-                          <span
-                            key={group}
-                            className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs"
-                          >
-                            {group.replace('_', ' ')}
-                          </span>
-                        ))}
-                      </div>
-                      
-                      <div className="flex justify-between items-center text-xs text-gray-500">
-                        <span>{exercise.equipment?.join(', ').replace(/_/g, ' ')}</span>
-                        {exercise.difficulty_level && (
-                          <span className={`px-2 py-1 rounded-full ${
-                            exercise.difficulty_level === 'beginner' ? 'bg-green-100 text-green-700' :
-                            exercise.difficulty_level === 'intermediate' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-red-100 text-red-700'
-                          }`}>
-                            {exercise.difficulty_level}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                {filteredExercises.length === 0 && (
-                  <div className="text-center py-8">
-                    <p className="text-gray-600">No exercises found matching your search.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

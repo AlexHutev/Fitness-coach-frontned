@@ -1,148 +1,373 @@
 'use client';
 
-import { useAuth, withAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
+import { withAuth } from '@/context/AuthContext';
+import Link from 'next/link';
+import { 
+  Users, 
+  Calendar, 
+  TrendingUp, 
+  Target, 
+  Plus, 
+  Activity,
+  Clock,
+  CheckCircle,
+  ArrowRight,
+  BarChart3,
+  Dumbbell
+} from 'lucide-react';
 
 function DashboardPage() {
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  const quickStats = [
+    { 
+      title: 'Active Clients', 
+      value: '12', 
+      change: '+2 this month',
+      icon: Users,
+      color: 'blue',
+      trend: 'up'
+    },
+    { 
+      title: 'Programs Created', 
+      value: '8', 
+      change: '+3 this week',
+      icon: Target,
+      color: 'green',
+      trend: 'up'
+    },
+    { 
+      title: 'Sessions This Week', 
+      value: '24', 
+      change: '6 remaining',
+      icon: Calendar,
+      color: 'purple',
+      trend: 'stable'
+    },
+    { 
+      title: 'Client Progress', 
+      value: '94%', 
+      change: '+5% improvement',
+      icon: TrendingUp,
+      color: 'orange',
+      trend: 'up'
+    }
+  ];
+
+  const todaysSchedule = [
+    {
+      time: '9:00 AM',
+      client: 'Sarah Johnson',
+      type: 'Personal Training',
+      status: 'confirmed'
+    },
+    {
+      time: '11:00 AM',
+      client: 'Mike Chen',
+      type: 'Program Review',
+      status: 'confirmed'
+    },
+    {
+      time: '2:00 PM',
+      client: 'Emma Davis',
+      type: 'Initial Assessment',
+      status: 'pending'
+    },
+    {
+      time: '4:00 PM',
+      client: 'James Wilson',
+      type: 'Personal Training',
+      status: 'confirmed'
+    }
+  ];
+
+  const recentActivity = [
+    {
+      action: 'Created new program',
+      subject: 'Beginner Strength Training',
+      time: '2 hours ago',
+      icon: Target
+    },
+    {
+      action: 'Client completed workout',
+      subject: 'Sarah Johnson - Upper Body',
+      time: '4 hours ago',
+      icon: CheckCircle
+    },
+    {
+      action: 'New client registered',
+      subject: 'Alex Thompson',
+      time: '1 day ago',
+      icon: Users
+    },
+    {
+      action: 'Program milestone reached',
+      subject: 'Mike Chen - Week 4 Complete',
+      time: '2 days ago',
+      icon: TrendingUp
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Section */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, {user?.first_name}! 👋
-          </h1>
-          <p className="text-gray-600">
-            Here's your fitness coaching dashboard. Manage your clients, programs, and grow your business.
-          </p>
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center">
+            <div className="mb-6 lg:mb-0">
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                Welcome back, {user?.first_name}! 👋
+              </h1>
+              <p className="text-gray-600 text-lg">
+                Here&apos;s your fitness coaching dashboard. Manage your clients, programs, and grow your business.
+              </p>
+            </div>
+            <div className="flex space-x-4">
+              <Link
+                href="/clients/create"
+                className="btn-secondary inline-flex items-center space-x-2"
+              >
+                <Plus className="w-5 h-5" />
+                <span>Add Client</span>
+              </Link>
+              <Link
+                href="/programs/create"
+                className="btn-primary inline-flex items-center space-x-2"
+              >
+                <Plus className="w-5 h-5" />
+                <span>Create Program</span>
+              </Link>
+            </div>
+          </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                </svg>
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {quickStats.map((stat, index) => (
+            <StatCard key={index} stat={stat} />
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Today's Schedule */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl shadow-card p-6 border border-gray-100">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                  <Calendar className="w-6 h-6 mr-3 text-blue-600" />
+                  Today&apos;s Schedule
+                </h2>
+                <Link
+                  href="/schedule"
+                  className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
+                >
+                  View all
+                  <ArrowRight className="w-4 h-4 ml-1" />
+                </Link>
               </div>
-              <div className="ml-4">
-                <h3 className="text-lg font-semibold text-gray-900">Active Clients</h3>
-                <p className="text-2xl font-bold text-blue-600">0</p>
+              
+              <div className="space-y-4">
+                {todaysSchedule.map((session, index) => (
+                  <ScheduleItem key={index} session={session} />
+                ))}
               </div>
+              
+              {todaysSchedule.length === 0 && (
+                <div className="text-center py-8">
+                  <Clock className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500">No sessions scheduled for today</p>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+          {/* Recent Activity */}
+          <div>
+            <div className="bg-white rounded-xl shadow-card p-6 border border-gray-100">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                  <Activity className="w-6 h-6 mr-3 text-green-600" />
+                  Recent Activity
+                </h2>
               </div>
-              <div className="ml-4">
-                <h3 className="text-lg font-semibold text-gray-900">Programs</h3>
-                <p className="text-2xl font-bold text-green-600">0</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <h3 className="text-lg font-semibold text-gray-900">This Month</h3>
-                <p className="text-2xl font-bold text-orange-600">0</p>
+              
+              <div className="space-y-4">
+                {recentActivity.map((activity, index) => (
+                  <ActivityItem key={index} activity={activity} />
+                ))}
               </div>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="flex items-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-              </div>
-              <div className="text-left">
-                <h3 className="font-medium text-gray-900">Add New Client</h3>
-                <p className="text-sm text-gray-600">Start managing a new client</p>
-              </div>
-            </button>
-
-            <button className="flex items-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-500 hover:bg-green-50 transition-colors">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div className="text-left">
-                <h3 className="font-medium text-gray-900">Create Program</h3>
-                <p className="text-sm text-gray-600">Design a training program</p>
-              </div>
-            </button>
-
-            <button className="flex items-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-colors">
-              <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
-                <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.546 2.546 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zM3 9h18v4H3V9z" />
-                </svg>
-              </div>
-              <div className="text-left">
-                <h3 className="font-medium text-gray-900">Meal Plan</h3>
-                <p className="text-sm text-gray-600">Create nutrition plans</p>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* Profile Info */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Profile</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-medium text-gray-900 mb-2">Personal Information</h3>
-              <div className="space-y-2 text-sm">
-                <p><span className="text-gray-600">Name:</span> {user?.first_name} {user?.last_name}</p>
-                <p><span className="text-gray-600">Email:</span> {user?.email}</p>
-                <p><span className="text-gray-600">Phone:</span> {user?.phone_number || 'Not provided'}</p>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-900 mb-2">Professional Details</h3>
-              <div className="space-y-2 text-sm">
-                <p><span className="text-gray-600">Specialization:</span> {user?.specialization || 'Not specified'}</p>
-                <p><span className="text-gray-600">Experience:</span> {user?.experience || 'Not specified'}</p>
-                <p><span className="text-gray-600">Role:</span> {user?.role}</p>
-              </div>
+        <div className="mt-8">
+          <div className="bg-white rounded-xl shadow-card p-6 border border-gray-100">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <QuickActionCard
+                title="Manage Clients"
+                description="View and organize your client base"
+                icon={Users}
+                href="/clients"
+                color="blue"
+              />
+              <QuickActionCard
+                title="Create Program"
+                description="Design new training programs"
+                icon={Target}
+                href="/programs/create"
+                color="green"
+              />
+              <QuickActionCard
+                title="Exercise Library"
+                description="Browse and add exercises"
+                icon={Dumbbell}
+                href="/exercises"
+                color="purple"
+              />
+              <QuickActionCard
+                title="View Analytics"
+                description="Track performance metrics"
+                icon={BarChart3}
+                href="/analytics"
+                color="orange"
+              />
             </div>
           </div>
-          {user?.bio && (
-            <div className="mt-4">
-              <h3 className="font-medium text-gray-900 mb-2">Bio</h3>
-              <p className="text-sm text-gray-600">{user.bio}</p>
-            </div>
-          )}
         </div>
       </div>
     </div>
+  );
+}
+
+// Stat Card Component
+function StatCard({ stat }: { stat: {
+  title: string;
+  value: string;
+  change: string;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+  trend: string;
+} }) {
+  const Icon = stat.icon;
+  const colorClasses = {
+    blue: 'bg-blue-50 text-blue-600',
+    green: 'bg-green-50 text-green-600',
+    purple: 'bg-purple-50 text-purple-600',
+    orange: 'bg-orange-50 text-orange-600',
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-card p-6 border border-gray-100 hover:shadow-lg transition-shadow">
+      <div className="flex items-center justify-between mb-4">
+        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${colorClasses[stat.color as keyof typeof colorClasses]}`}>
+          <Icon className="w-6 h-6" />
+        </div>
+        <div className={`text-sm font-medium ${
+          stat.trend === 'up' ? 'text-green-600' : 
+          stat.trend === 'down' ? 'text-red-600' : 'text-gray-600'
+        }`}>
+          {stat.change}
+        </div>
+      </div>
+      <div>
+        <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
+        <div className="text-sm text-gray-600">{stat.title}</div>
+      </div>
+    </div>
+  );
+}
+
+// Schedule Item Component
+function ScheduleItem({ session }: { session: {
+  time: string;
+  client: string;
+  type: string;
+  status: string;
+} }) {
+  const statusColors = {
+    confirmed: 'bg-green-100 text-green-800',
+    pending: 'bg-yellow-100 text-yellow-800',
+    cancelled: 'bg-red-100 text-red-800',
+  };
+
+  return (
+    <div className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
+      <div className="flex items-center space-x-4">
+        <div className="text-sm font-medium text-gray-900 min-w-[70px]">
+          {session.time}
+        </div>
+        <div>
+          <div className="text-sm font-medium text-gray-900">{session.client}</div>
+          <div className="text-xs text-gray-500">{session.type}</div>
+        </div>
+      </div>
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[session.status as keyof typeof statusColors]}`}>
+        {session.status}
+      </span>
+    </div>
+  );
+}
+
+// Activity Item Component
+function ActivityItem({ activity }: { activity: {
+  action: string;
+  subject: string;
+  time: string;
+  icon: React.ComponentType<{ className?: string }>;
+} }) {
+  const Icon = activity.icon;
+  
+  return (
+    <div className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+        <Icon className="w-4 h-4 text-gray-600" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="text-sm text-gray-900">
+          <span className="font-medium">{activity.action}</span>
+          <span className="ml-1">{activity.subject}</span>
+        </div>
+        <div className="text-xs text-gray-500 mt-1">{activity.time}</div>
+      </div>
+    </div>
+  );
+}
+
+// Quick Action Card Component
+function QuickActionCard({ 
+  title, 
+  description, 
+  icon: Icon, 
+  href, 
+  color 
+}: { 
+  title: string; 
+  description: string; 
+  icon: React.ComponentType<{ className?: string }>; 
+  href: string; 
+  color: string;
+}) {
+  const colorClasses = {
+    blue: 'bg-blue-50 text-blue-600 group-hover:bg-blue-100',
+    green: 'bg-green-50 text-green-600 group-hover:bg-green-100',
+    purple: 'bg-purple-50 text-purple-600 group-hover:bg-purple-100',
+    orange: 'bg-orange-50 text-orange-600 group-hover:bg-orange-100',
+  };
+
+  return (
+    <Link
+      href={href}
+      className="group p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-md transition-all"
+    >
+      <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-3 transition-colors ${colorClasses[color as keyof typeof colorClasses]}`}>
+        <Icon className="w-5 h-5" />
+      </div>
+      <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
+      <p className="text-sm text-gray-600">{description}</p>
+    </Link>
   );
 }
 

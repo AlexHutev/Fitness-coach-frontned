@@ -15,11 +15,25 @@ export const API_ENDPOINTS = {
   CLIENT_BY_ID: (id: number) => `/api/v1/clients/${id}`,
   CLIENT_COUNT: '/api/v1/clients/count',
   
+  // Exercises
+  EXERCISES: '/api/v1/exercises',
+  EXERCISE_BY_ID: (id: number) => `/api/v1/exercises/${id}`,
+  EXERCISES_PUBLIC: '/api/v1/exercises/public',
+  EXERCISES_BULK: '/api/v1/exercises/bulk',
+  EXERCISES_MUSCLE_GROUPS: '/api/v1/exercises/muscle-groups',
+  EXERCISES_EQUIPMENT_TYPES: '/api/v1/exercises/equipment-types',
+  
+  // Programs
+  PROGRAMS: '/api/v1/programs',
+  PROGRAM_BY_ID: (id: number) => `/api/v1/programs/${id}`,
+  PROGRAM_DUPLICATE: (id: number) => `/api/v1/programs/${id}/duplicate`,
+  PROGRAMS_SEARCH: '/api/v1/programs/search',
+  
   // Health
   HEALTH: '/api/v1/health',
 } as const;
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
   status: number;
@@ -79,7 +93,7 @@ class ApiClient {
         data,
         status,
       };
-    } catch (error) {
+    } catch {
       return {
         error: 'Failed to parse response',
         status,
@@ -87,15 +101,30 @@ class ApiClient {
     }
   }
 
-  public async get<T = any>(endpoint: string): Promise<ApiResponse<T>> {
+  public async get<T = unknown>(endpoint: string, options?: { params?: Record<string, unknown> }): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(`${this.baseURL}${endpoint}`, {
+      let url = `${this.baseURL}${endpoint}`;
+      
+      if (options?.params) {
+        const searchParams = new URLSearchParams();
+        Object.entries(options.params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            searchParams.append(key, String(value));
+          }
+        });
+        const paramString = searchParams.toString();
+        if (paramString) {
+          url += `${endpoint.includes('?') ? '&' : '?'}${paramString}`;
+        }
+      }
+      
+      const response = await fetch(url, {
         method: 'GET',
         headers: this.getAuthHeaders(),
       });
       
       return this.handleResponse<T>(response);
-    } catch (error) {
+    } catch {
       return {
         error: 'Network error occurred',
         status: 0,
@@ -103,16 +132,31 @@ class ApiClient {
     }
   }
 
-  public async post<T = any>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  public async post<T = unknown>(endpoint: string, data?: unknown, options?: { params?: Record<string, unknown> }): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(`${this.baseURL}${endpoint}`, {
+      let url = `${this.baseURL}${endpoint}`;
+      
+      if (options?.params) {
+        const searchParams = new URLSearchParams();
+        Object.entries(options.params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            searchParams.append(key, String(value));
+          }
+        });
+        const paramString = searchParams.toString();
+        if (paramString) {
+          url += `${endpoint.includes('?') ? '&' : '?'}${paramString}`;
+        }
+      }
+      
+      const response = await fetch(url, {
         method: 'POST',
         headers: this.getAuthHeaders(),
         body: data ? JSON.stringify(data) : undefined,
       });
       
       return this.handleResponse<T>(response);
-    } catch (error) {
+    } catch {
       return {
         error: 'Network error occurred',
         status: 0,
@@ -120,7 +164,7 @@ class ApiClient {
     }
   }
 
-  public async put<T = any>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  public async put<T = unknown>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     try {
       const response = await fetch(`${this.baseURL}${endpoint}`, {
         method: 'PUT',
@@ -129,7 +173,7 @@ class ApiClient {
       });
       
       return this.handleResponse<T>(response);
-    } catch (error) {
+    } catch {
       return {
         error: 'Network error occurred',
         status: 0,
@@ -137,7 +181,7 @@ class ApiClient {
     }
   }
 
-  public async delete<T = any>(endpoint: string): Promise<ApiResponse<T>> {
+  public async delete<T = unknown>(endpoint: string): Promise<ApiResponse<T>> {
     try {
       const response = await fetch(`${this.baseURL}${endpoint}`, {
         method: 'DELETE',
@@ -145,7 +189,7 @@ class ApiClient {
       });
       
       return this.handleResponse<T>(response);
-    } catch (error) {
+    } catch {
       return {
         error: 'Network error occurred',
         status: 0,

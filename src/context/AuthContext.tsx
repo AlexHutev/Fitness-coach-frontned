@@ -17,32 +17,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Initialize auth state on mount
   useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        const storedToken = AuthService.getToken();
+        if (storedToken) {
+          const userResponse = await AuthService.getCurrentUser();
+          if (userResponse.data) {
+            setUser(userResponse.data);
+            setToken(storedToken);
+          } else {
+            // Token is invalid, remove it
+            AuthService.logout();
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        AuthService.logout();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     initializeAuth();
   }, []);
-
-  const initializeAuth = async () => {
-    try {
-      const storedToken = AuthService.getToken();
-      
-      if (storedToken) {
-        setToken(storedToken);
-        
-        // Verify token and get user data
-        const userResponse = await AuthService.getCurrentUser();
-        if (userResponse.data) {
-          setUser(userResponse.data);
-        } else {
-          // Token is invalid, clear it
-          logout();
-        }
-      }
-    } catch (error) {
-      console.error('Auth initialization error:', error);
-      logout();
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {

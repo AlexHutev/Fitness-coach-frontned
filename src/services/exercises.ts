@@ -1,10 +1,13 @@
-import { apiClient } from '../lib/api';
+import { apiClient, API_ENDPOINTS } from '../lib/api';
 import { Exercise, ExerciseList, CreateExercise, UpdateExercise } from '../types/api';
 
 export class ExerciseService {
   // Create a new exercise
   static async createExercise(exerciseData: CreateExercise): Promise<Exercise> {
-    const response = await apiClient.post<Exercise>('/exercises/', exerciseData);
+    const response = await apiClient.post<Exercise>(API_ENDPOINTS.EXERCISES, exerciseData);
+    if (response.error || !response.data) {
+      throw new Error(response.error || 'Failed to create exercise');
+    }
     return response.data;
   }
 
@@ -19,9 +22,10 @@ export class ExerciseService {
     created_by_me?: boolean;
     is_public?: boolean;
   }): Promise<ExerciseList[]> {
-    const response = await apiClient.get<ExerciseList[]>('/exercises/', {
-      params: params || {}
-    });
+    const response = await apiClient.get<ExerciseList[]>(API_ENDPOINTS.EXERCISES, { params });
+    if (response.error || !response.data) {
+      throw new Error(response.error || 'Failed to fetch exercises');
+    }
     return response.data;
   }
 
@@ -34,44 +38,63 @@ export class ExerciseService {
     difficulty_level?: string;
     search_term?: string;
   }): Promise<ExerciseList[]> {
-    const response = await apiClient.get<ExerciseList[]>('/exercises/public', {
-      params: params || {}
-    });
+    const response = await apiClient.get<ExerciseList[]>(API_ENDPOINTS.EXERCISES_PUBLIC, { params });
+    if (response.error || !response.data) {
+      throw new Error(response.error || 'Failed to fetch public exercises');
+    }
     return response.data;
   }
 
   // Get a specific exercise by ID
   static async getExercise(exerciseId: number): Promise<Exercise> {
-    const response = await apiClient.get<Exercise>(`/exercises/${exerciseId}`);
+    const response = await apiClient.get<Exercise>(API_ENDPOINTS.EXERCISE_BY_ID(exerciseId));
+    if (response.error || !response.data) {
+      throw new Error(response.error || 'Failed to fetch exercise');
+    }
     return response.data;
   }
 
   // Update an existing exercise
   static async updateExercise(exerciseId: number, updateData: UpdateExercise): Promise<Exercise> {
-    const response = await apiClient.put<Exercise>(`/exercises/${exerciseId}`, updateData);
+    const response = await apiClient.put<Exercise>(API_ENDPOINTS.EXERCISE_BY_ID(exerciseId), updateData);
+    if (response.error || !response.data) {
+      throw new Error(response.error || 'Failed to update exercise');
+    }
     return response.data;
   }
 
   // Delete an exercise
   static async deleteExercise(exerciseId: number): Promise<void> {
-    await apiClient.delete(`/exercises/${exerciseId}`);
+    const response = await apiClient.delete(API_ENDPOINTS.EXERCISE_BY_ID(exerciseId));
+    if (response.error) {
+      throw new Error(response.error || 'Failed to delete exercise');
+    }
   }
 
   // Get multiple exercises by their IDs
   static async getExercisesByIds(exerciseIds: number[]): Promise<ExerciseList[]> {
-    const response = await apiClient.post<ExerciseList[]>('/exercises/bulk', exerciseIds);
+    const response = await apiClient.post<ExerciseList[]>(API_ENDPOINTS.EXERCISES_BULK, exerciseIds);
+    if (response.error || !response.data) {
+      throw new Error(response.error || 'Failed to fetch exercises');
+    }
     return response.data;
   }
 
   // Get available muscle groups
   static async getMuscleGroups(): Promise<string[]> {
-    const response = await apiClient.get<string[]>('/exercises/muscle-groups');
+    const response = await apiClient.get<string[]>(API_ENDPOINTS.EXERCISES_MUSCLE_GROUPS);
+    if (response.error || !response.data) {
+      throw new Error(response.error || 'Failed to fetch muscle groups');
+    }
     return response.data;
   }
 
   // Get available equipment types
   static async getEquipmentTypes(): Promise<string[]> {
-    const response = await apiClient.get<string[]>('/exercises/equipment-types');
+    const response = await apiClient.get<string[]>(API_ENDPOINTS.EXERCISES_EQUIPMENT_TYPES);
+    if (response.error || !response.data) {
+      throw new Error(response.error || 'Failed to fetch equipment types');
+    }
     return response.data;
   }
 }

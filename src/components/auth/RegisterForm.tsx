@@ -135,8 +135,8 @@ export default function RegisterForm() {
         first_name: formData.firstName,
         last_name: formData.lastName,
         phone_number: formData.phoneNumber || undefined,
-        specialization: formData.specialization as any || undefined,
-        experience: formData.experience as any || undefined,
+        specialization: (formData.specialization || undefined) as RegisterRequest['specialization'],
+        experience: (formData.experience || undefined) as RegisterRequest['experience'],
         bio: formData.bio || undefined,
       };
 
