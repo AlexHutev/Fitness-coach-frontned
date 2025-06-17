@@ -29,6 +29,13 @@ export const API_ENDPOINTS = {
   PROGRAM_DUPLICATE: (id: number) => `/api/v1/programs/${id}/duplicate`,
   PROGRAMS_SEARCH: '/api/v1/programs/search',
   
+  // Program Assignments
+  PROGRAM_ASSIGN: (id: number) => `/api/v1/programs/${id}/assign`,
+  PROGRAM_ASSIGNMENTS: '/api/v1/assignments',
+  PROGRAM_ASSIGNMENT_BY_ID: (id: number) => `/api/v1/assignments/${id}`,
+  PROGRAM_ASSIGNMENT_PROGRESS: (id: number) => `/api/v1/assignments/${id}/progress`,
+  CLIENT_ACTIVE_ASSIGNMENT: (clientId: number) => `/api/v1/programs/clients/${clientId}/active-assignment`,
+  
   // Health
   HEALTH: '/api/v1/health',
 } as const;

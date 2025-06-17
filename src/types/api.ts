@@ -258,3 +258,78 @@ export interface UpdateExercise {
   video_url?: string;
   is_public?: boolean;
 }
+
+
+// Program Assignment types
+export type AssignmentStatus = 'active' | 'completed' | 'paused' | 'cancelled';
+
+export interface ProgramAssignment {
+  id: number;
+  program_id: number;
+  client_id: number;
+  trainer_id: number;
+  assigned_date: string;
+  start_date?: string;
+  end_date?: string;
+  status: AssignmentStatus;
+  custom_notes?: string;
+  trainer_notes?: string;
+  completion_percentage: number;
+  sessions_completed: number;
+  total_sessions?: number;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface ProgramAssignmentWithDetails extends ProgramAssignment {
+  program_name: string;
+  program_type: string;
+  program_difficulty: string;
+  client_name: string;
+  client_email?: string;
+}
+
+export interface ProgramAssignmentList {
+  id: number;
+  program_id: number;
+  program_name: string;
+  client_id: number;
+  client_name: string;
+  status: AssignmentStatus;
+  assigned_date: string;
+  start_date?: string;
+  completion_percentage: number;
+}
+
+export interface CreateProgramAssignment {
+  program_id: number;
+  client_id: number;
+  start_date?: string;
+  end_date?: string;
+  custom_notes?: string;
+  trainer_notes?: string;
+}
+
+export interface UpdateProgramAssignment {
+  start_date?: string;
+  end_date?: string;
+  status?: AssignmentStatus;
+  custom_notes?: string;
+  trainer_notes?: string;
+  completion_percentage?: number;
+  sessions_completed?: number;
+  total_sessions?: number;
+}
+
+export interface ProgressUpdate {
+  sessions_completed: number;
+  completion_percentage: number;
+  notes?: string;
+}
+
+export interface BulkAssignmentRequest {
+  program_id: number;
+  client_ids: number[];
+  start_date?: string;
+  custom_notes?: string;
+}

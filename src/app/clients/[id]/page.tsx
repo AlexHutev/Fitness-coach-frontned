@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { withAuth } from '@/context/AuthContext';
 import { ClientService } from '@/services/clients';
 import type { Client } from '@/types/api';
@@ -30,12 +30,18 @@ import {
 
 function ClientDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const clientId = parseInt(params.id as string);
   
   const [client, setClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
+
+  // Handle assign program button click
+  const handleAssignProgram = () => {
+    router.push(`/programs/assignments?client=${clientId}`);
+  };
 
   useEffect(() => {
     const loadClient = async () => {
@@ -180,7 +186,10 @@ function ClientDetailPage() {
 
             {/* Actions */}
             <div className="flex space-x-3">
-              <button className="btn-secondary inline-flex items-center space-x-2">
+              <button 
+                onClick={handleAssignProgram}
+                className="btn-secondary inline-flex items-center space-x-2"
+              >
                 <Plus className="w-4 h-4" />
                 <span>Assign Program</span>
               </button>
@@ -384,7 +393,10 @@ function ClientDetailPage() {
               <p className="text-gray-600 mb-6">
                 This client doesn't have any training programs assigned yet.
               </p>
-              <button className="btn-primary inline-flex items-center space-x-2">
+              <button 
+                onClick={handleAssignProgram}
+                className="btn-primary inline-flex items-center space-x-2"
+              >
                 <Plus className="w-5 h-5" />
                 <span>Assign Program</span>
               </button>

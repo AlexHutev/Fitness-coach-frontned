@@ -229,6 +229,7 @@ function ProgramCard({
   onView: (id: number) => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
+  const router = useRouter();
 
   return (
     <div className="group bg-white rounded-xl shadow-card hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden">
@@ -266,6 +267,13 @@ function ProgramCard({
                 >
                   <Edit className="w-4 h-4 mr-3" />
                   Edit
+                </button>
+                <button
+                  onClick={() => { router.push(`/programs/assignments?program=${program.id}`); setShowMenu(false); }}
+                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <Target className="w-4 h-4 mr-3" />
+                  Assign to Clients
                 </button>
                 <button
                   onClick={() => { onDelete(program.id); setShowMenu(false); }}

@@ -3,6 +3,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { withAuth } from '@/context/AuthContext';
 import Link from 'next/link';
+import AssignmentDashboardCard from '@/components/programs/AssignmentDashboardCard';
 import { 
   Users, 
   Calendar, 
@@ -201,6 +202,11 @@ function DashboardPage() {
           </div>
         </div>
 
+        {/* Program Assignments Section */}
+        <div className="mt-8">
+          <AssignmentDashboardCard />
+        </div>
+
         {/* Quick Actions */}
         <div className="mt-8">
           <div className="bg-white rounded-xl shadow-card p-6 border border-gray-100">
@@ -221,17 +227,17 @@ function DashboardPage() {
                 color="green"
               />
               <QuickActionCard
+                title="Program Assignments"
+                description="Assign programs to clients"
+                icon={Calendar}
+                href="/programs/assignments"
+                color="purple"
+              />
+              <QuickActionCard
                 title="Exercise Library"
                 description="Browse and add exercises"
                 icon={Dumbbell}
                 href="/exercises"
-                color="purple"
-              />
-              <QuickActionCard
-                title="View Analytics"
-                description="Track performance metrics"
-                icon={BarChart3}
-                href="/analytics"
                 color="orange"
               />
             </div>

@@ -39,6 +39,7 @@ export default function Header() {
                 <NavLink href="/dashboard">Dashboard</NavLink>
                 <NavLink href="/clients">Clients</NavLink>
                 <NavLink href="/programs">Programs</NavLink>
+                <NavLink href="/programs/assignments">Assignments</NavLink>
                 <NavLink href="/exercises">Exercises</NavLink>
               </>
             ) : (
@@ -160,6 +161,9 @@ export default function Header() {
                   </MobileNavLink>
                   <MobileNavLink href="/programs" onClick={() => setIsMenuOpen(false)}>
                     Programs
+                  </MobileNavLink>
+                  <MobileNavLink href="/programs/assignments" onClick={() => setIsMenuOpen(false)}>
+                    Assignments
                   </MobileNavLink>
                   <MobileNavLink href="/exercises" onClick={() => setIsMenuOpen(false)}>
                     Exercises
