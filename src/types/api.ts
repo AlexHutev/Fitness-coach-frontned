@@ -301,6 +301,8 @@ export interface ProgramAssignmentWithDetails extends ProgramAssignment {
   program_name: string;
   program_type: string;
   program_difficulty: string;
+  program_description?: string;
+  workout_structure?: WorkoutDay[];
   client_name: string;
   client_email?: string;
 }
