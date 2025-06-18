@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { withAuth } from '@/context/AuthContext';
 import { ClientService } from '@/services/clients';
 import ClientPrograms from '@/components/clients/ClientPrograms';
+import WeeklyExerciseView from '@/components/clients/WeeklyExerciseView';
 import type { Client } from '@/types/api';
 import Link from 'next/link';
 import { 
@@ -26,7 +27,8 @@ import {
   TrendingUp,
   BarChart3,
   MessageSquare,
-  Plus
+  Plus,
+  Dumbbell
 } from 'lucide-react';
 
 function ClientDetailPage() {
@@ -140,6 +142,7 @@ function ClientDetailPage() {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
     { id: 'programs', label: 'Programs', icon: Target },
+    { id: 'exercises', label: 'Weekly Exercises', icon: Dumbbell },
     { id: 'progress', label: 'Progress', icon: TrendingUp },
     { id: 'notes', label: 'Notes', icon: MessageSquare }
   ];
@@ -388,6 +391,11 @@ function ClientDetailPage() {
         {/* Programs Tab */}
         {activeTab === 'programs' && (
           <ClientPrograms clientId={clientId} onAssignProgram={handleAssignProgram} />
+        )}
+
+        {/* Weekly Exercises Tab */}
+        {activeTab === 'exercises' && (
+          <WeeklyExerciseView clientId={clientId} />
         )}
 
         {/* Progress Tab */}

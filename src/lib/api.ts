@@ -68,7 +68,22 @@ class ApiClient {
 
   private getToken(): string | null {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('auth_token');
+    
+    // Check multiple possible token keys
+    const tokenKeys = ['auth_token', 'token', 'access_token', 'authToken'];
+    
+    for (const key of tokenKeys) {
+      const token = localStorage.getItem(key);
+      if (token) {
+        // If found in a different key, copy it to the standard location
+        if (key !== 'auth_token') {
+          localStorage.setItem('auth_token', token);
+        }
+        return token;
+      }
+    }
+    
+    return null;
   }
 
   public setToken(token: string): void {
@@ -180,9 +195,19 @@ class ApiClient {
       });
       
       return this.handleResponse<T>(response);
-    } catch {
+    } catch (error) {
+      console.error('PUT request failed:', error);
+      
+      // Enhanced error handling for CORS and network issues
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        return {
+          error: 'Network error: Unable to connect to server. Please check if the backend is running on localhost:8000',
+          status: 0,
+        };
+      }
+      
       return {
-        error: 'Network error occurred',
+        error: `Network error occurred: ${error instanceof Error ? error.message : 'Unknown error'}`,
         status: 0,
       };
     }

@@ -17,10 +17,17 @@ export default function ProgramAssignmentList({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [filter, setFilter] = useState<AssignmentStatus | 'all'>('all');
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    loadAssignments();
-  }, [clientId, filter]);
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+      loadAssignments();
+    }
+  }, [clientId, filter, isMounted]);
 
   const loadAssignments = async () => {
     setIsLoading(true);
@@ -60,6 +67,17 @@ export default function ProgramAssignmentList({
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
   };
+
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!isMounted) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span className="ml-2 text-gray-600">Loading assignments...</span>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -127,7 +145,8 @@ export default function ProgramAssignmentList({
                   Assigned
                 </th>
               </tr>
-            </thead>            <tbody className="bg-white divide-y divide-gray-200">
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
               {assignments.map((assignment) => (
                 <tr 
                   key={assignment.id}

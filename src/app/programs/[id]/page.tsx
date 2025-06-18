@@ -37,10 +37,17 @@ function ProgramViewPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
   const [selectedDay, setSelectedDay] = useState(1);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    loadProgram();
-  }, [programId]);
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isMounted && programId) {
+      loadProgram();
+    }
+  }, [programId, isMounted]);
 
   useEffect(() => {
     if (program?.workout_structure) {
@@ -125,7 +132,7 @@ function ProgramViewPage() {
     }
   };
 
-  if (loading) {
+  if (!isMounted || loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">

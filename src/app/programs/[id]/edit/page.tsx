@@ -16,6 +16,7 @@ import {
 import { withAuth } from '@/context/AuthContext';
 import { ProgramService } from '@/services/programs';
 import { ExerciseService } from '@/services/exercises';
+import WorkoutDayEditor from '@/components/programs/WorkoutDayEditor';
 import { Program, Exercise, ExerciseList, WorkoutDay, ExerciseInWorkout, UpdateProgram, ProgramType, DifficultyLevel } from '@/types/api';
 
 function ProgramEditPage() {
@@ -28,6 +29,17 @@ function ProgramEditPage() {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isMounted && programId) {
+      loadProgram();
+    }
+  }, [programId, isMounted]);
   const [error, setError] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [showExerciseSelector, setShowExerciseSelector] = useState<{
@@ -36,9 +48,10 @@ function ProgramEditPage() {
   } | null>(null);
 
   useEffect(() => {
-    loadProgram();
-    loadExercises();
-  }, [programId]);
+    if (isMounted) {
+      loadExercises();
+    }
+  }, [isMounted]);
 
   useEffect(() => {
     if (originalProgram && program) {
@@ -83,26 +96,109 @@ function ProgramEditPage() {
     }
   };
 
+  const cleanWorkoutStructure = (workoutStructure: WorkoutDay[]): WorkoutDay[] => {
+    return workoutStructure.map(day => ({
+      day: day.day,
+      name: day.name?.trim() || `Day ${day.day}`,
+      exercises: day.exercises.map(exercise => ({
+        exercise_id: exercise.exercise_id,
+        sets: exercise.sets || 1,
+        reps: exercise.reps?.trim() || '10',
+        weight: exercise.weight?.trim() || 'bodyweight',
+        rest_seconds: exercise.rest_seconds || 60,
+        notes: exercise.notes?.trim() || undefined
+      }))
+    }));
+  };
+
+  const validateProgram = (program: Program): string[] => {
+    const errors: string[] = [];
+    
+    if (!program.name?.trim()) {
+      errors.push('Program name is required');
+    }
+    
+    if (!program.program_type) {
+      errors.push('Program type is required');
+    }
+    
+    if (!program.difficulty_level) {
+      errors.push('Difficulty level is required');
+    }
+    
+    if (program.duration_weeks && (program.duration_weeks < 1 || program.duration_weeks > 52)) {
+      errors.push('Duration must be between 1 and 52 weeks');
+    }
+    
+    if (program.sessions_per_week && (program.sessions_per_week < 1 || program.sessions_per_week > 7)) {
+      errors.push('Sessions per week must be between 1 and 7');
+    }
+    
+    // Validate workout structure
+    if (program.workout_structure) {
+      program.workout_structure.forEach((day, dayIndex) => {
+        if (!day.name?.trim()) {
+          errors.push(`Day ${dayIndex + 1} name is required`);
+        }
+        
+        day.exercises.forEach((exercise, exerciseIndex) => {
+          if (!exercise.exercise_id) {
+            errors.push(`Day ${dayIndex + 1}, Exercise ${exerciseIndex + 1}: Exercise ID is required`);
+          }
+          if (!exercise.sets || exercise.sets < 1) {
+            errors.push(`Day ${dayIndex + 1}, Exercise ${exerciseIndex + 1}: Sets must be at least 1`);
+          }
+          if (!exercise.reps?.trim()) {
+            errors.push(`Day ${dayIndex + 1}, Exercise ${exerciseIndex + 1}: Reps are required`);
+          }
+          if (!exercise.rest_seconds || exercise.rest_seconds < 0) {
+            errors.push(`Day ${dayIndex + 1}, Exercise ${exerciseIndex + 1}: Rest time must be 0 or greater`);
+          }
+        });
+      });
+    }
+    
+    return errors;
+  };
+
   const handleSave = async () => {
     if (!program || !hasChanges) return;
     
     try {
       setSaving(true);
+      console.log('🔄 Saving program...', { programId, program });
+      
+      // Validate program data before saving
+      const validationErrors = validateProgram(program);
+      if (validationErrors.length > 0) {
+        console.log('❌ Validation errors:', validationErrors);
+        alert('Please fix the following issues:\n• ' + validationErrors.join('\n• '));
+        return;
+      }
+      
+      // Clean and validate workout structure
+      const cleanedWorkoutStructure = program.workout_structure ? 
+        cleanWorkoutStructure(program.workout_structure) : [];
+      
       const updateData: UpdateProgram = {
-        name: program.name,
-        description: program.description,
+        name: program.name?.trim(),
+        description: program.description?.trim() || undefined,
         program_type: program.program_type,
         difficulty_level: program.difficulty_level,
-        duration_weeks: program.duration_weeks,
-        sessions_per_week: program.sessions_per_week,
-        workout_structure: program.workout_structure,
-        tags: program.tags,
-        equipment_needed: program.equipment_needed,
+        duration_weeks: program.duration_weeks || undefined,
+        sessions_per_week: program.sessions_per_week || undefined,
+        workout_structure: cleanedWorkoutStructure,
+        tags: program.tags?.trim() || undefined,
+        equipment_needed: program.equipment_needed || undefined,
         is_template: program.is_template,
         is_active: program.is_active
       };
       
-      await ProgramService.updateProgram(programId, updateData);
+      console.log('📊 Update data:', updateData);
+      
+      const result = await ProgramService.updateProgram(programId, updateData);
+      console.log('✅ Save successful:', result);
+      
       setOriginalProgram(JSON.parse(JSON.stringify(program)));
       setHasChanges(false);
       
@@ -110,8 +206,35 @@ function ProgramEditPage() {
       alert('Program updated successfully!');
       router.push(`/programs/${programId}`);
     } catch (err) {
-      console.error('Error saving program:', err);
-      alert('Failed to save program. Please try again.');
+      console.error('❌ Error saving program:', err);
+      
+      // Enhanced error messaging
+      let errorMessage = 'Failed to save program. Please try again.';
+      
+      if (err instanceof Error) {
+        console.log('📝 Error details:', {
+          message: err.message,
+          stack: err.stack,
+          name: err.name
+        });
+        
+        // Provide more specific error messages
+        if (err.message.includes('400')) {
+          errorMessage = 'Invalid program data. Please check all fields and try again.';
+        } else if (err.message.includes('401')) {
+          errorMessage = 'Authentication failed. Please log in again.';
+        } else if (err.message.includes('403')) {
+          errorMessage = 'You do not have permission to edit this program.';
+        } else if (err.message.includes('404')) {
+          errorMessage = 'Program not found. It may have been deleted.';
+        } else if (err.message.includes('500')) {
+          errorMessage = 'Server error. Please try again later.';
+        } else if (err.message.includes('network') || err.message.includes('fetch')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        }
+      }
+      
+      alert(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -194,7 +317,7 @@ function ProgramEditPage() {
     updateProgram({ workout_structure: newWorkoutStructure });
   };
 
-  if (loading) {
+  if (!isMounted || loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
