@@ -58,7 +58,7 @@ export default function CreateClientWithAccountModal({
       
       const response = await ClientService.createClientWithAccount(formData);
       
-      if (response.success) {
+      if (response.data && !response.error) {
         setSuccess(response.data);
       } else {
         setError(response.error || 'Failed to create client account');
