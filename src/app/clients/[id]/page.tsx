@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { withAuth } from '@/context/AuthContext';
 import { ClientService } from '@/services/clients';
+import ClientPrograms from '@/components/clients/ClientPrograms';
 import type { Client } from '@/types/api';
 import Link from 'next/link';
 import { 
@@ -386,22 +387,7 @@ function ClientDetailPage() {
 
         {/* Programs Tab */}
         {activeTab === 'programs' && (
-          <div className="bg-white rounded-xl shadow-card p-8 border border-gray-100">
-            <div className="text-center py-12">
-              <Target className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Programs Assigned</h3>
-              <p className="text-gray-600 mb-6">
-                This client doesn't have any training programs assigned yet.
-              </p>
-              <button 
-                onClick={handleAssignProgram}
-                className="btn-primary inline-flex items-center space-x-2"
-              >
-                <Plus className="w-5 h-5" />
-                <span>Assign Program</span>
-              </button>
-            </div>
-          </div>
+          <ClientPrograms clientId={clientId} onAssignProgram={handleAssignProgram} />
         )}
 
         {/* Progress Tab */}
