@@ -5,19 +5,24 @@ import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import ProgramAssignmentList from '@/components/programs/ProgramAssignmentList';
 import ProgramAssign from '@/components/programs/ProgramAssign';
+import WeeklyAssignment from '@/components/programs/WeeklyAssignment';
 import { ProgramAssignmentWithDetails } from '@/types/api';
 
 export default function AssignmentsPage() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<'list' | 'assign'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'assign' | 'weekly'>('list');
   const [refreshKey, setRefreshKey] = useState(0);
 
   // Check if we have a client parameter to auto-switch to assign tab and pre-select client
   useEffect(() => {
     const programParam = searchParams.get('program');
     const clientParam = searchParams.get('client');
-    if (programParam || clientParam) {
+    const weeklyParam = searchParams.get('weekly');
+    
+    if (weeklyParam || (clientParam && searchParams.get('type') === 'weekly')) {
+      setActiveTab('weekly');
+    } else if (programParam || clientParam) {
       setActiveTab('assign');
     }
   }, [searchParams]);
@@ -87,6 +92,16 @@ export default function AssignmentsPage() {
             >
               Assign Program
             </button>
+            <button
+              onClick={() => setActiveTab('weekly')}
+              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'weekly'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Weekly Assignment
+            </button>
           </nav>
         </div>
 
@@ -103,6 +118,12 @@ export default function AssignmentsPage() {
               onAssignmentComplete={handleAssignmentComplete}
               preselectedProgramId={searchParams.get('program') ? parseInt(searchParams.get('program')!) : undefined}
               preselectedClientIds={searchParams.get('client') ? [parseInt(searchParams.get('client')!)] : []}
+            />
+          )}
+          {activeTab === 'weekly' && (
+            <WeeklyAssignment 
+              onAssignmentComplete={handleAssignmentComplete}
+              preselectedClientId={searchParams.get('client') ? parseInt(searchParams.get('client')!) : undefined}
             />
           )}
         </div>

@@ -93,6 +93,14 @@ export function ClientCard({ client, onUpdate }: ClientCardProps) {
                 <Edit className="w-4 h-4 mr-3" />
                 Edit Client
               </Link>
+              <Link
+                href={`/programs/assignments?client=${client.id}&type=weekly`}
+                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                onClick={() => setShowMenu(false)}
+              >
+                <Calendar className="w-4 h-4 mr-3" />
+                Weekly Assignment
+              </Link>
             </div>
           )}
         </div>
@@ -133,20 +141,27 @@ export function ClientCard({ client, onUpdate }: ClientCardProps) {
 
       {/* Actions */}
       <div className="mt-6 pt-4 border-t border-gray-200">
-        <div className="flex space-x-3">
+        <div className="grid grid-cols-2 gap-2 mb-3">
           <Link
             href={`/clients/${client.id}`}
-            className="flex-1 btn-secondary text-center"
+            className="btn-secondary text-center text-sm py-2"
           >
             View Profile
           </Link>
           <Link
             href={`/clients/${client.id}/programs`}
-            className="flex-1 btn-primary text-center"
+            className="btn-primary text-center text-sm py-2"
           >
             Programs
           </Link>
         </div>
+        <Link
+          href={`/programs/assignments?client=${client.id}&type=weekly`}
+          className="w-full text-center text-sm py-2 px-4 border-2 border-blue-600 text-blue-600 rounded-md hover:bg-blue-50 transition-colors flex items-center justify-center"
+        >
+          <Calendar className="w-4 h-4 mr-2" />
+          Create Weekly Assignment
+        </Link>
       </div>
     </div>
   );
