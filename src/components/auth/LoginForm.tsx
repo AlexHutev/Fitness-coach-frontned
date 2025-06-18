@@ -55,7 +55,26 @@ export default function LoginForm() {
       const success = await login(formData.email, formData.password);
       
       if (success) {
-        router.push('/dashboard');
+        // Since the login function in AuthContext handles storing user data,
+        // we can immediately check localStorage after a successful login
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          try {
+            const userData = JSON.parse(storedUser);
+            if (userData.role === 'client') {
+              router.push('/client/dashboard');
+            } else {
+              router.push('/dashboard');
+            }
+          } catch (e) {
+            console.error('Error parsing user data:', e);
+            // Fallback to trainer dashboard if parsing fails
+            router.push('/dashboard');
+          }
+        } else {
+          // Fallback if no user data in localStorage
+          router.push('/dashboard');
+        }
       } else {
         setErrors({ general: 'Invalid email or password. Please try again.' });
       }
@@ -210,6 +229,7 @@ export default function LoginForm() {
             <p className="text-sm text-blue-800 font-medium mb-2">Demo Credentials:</p>
             <div className="space-y-1 text-xs text-blue-700">
               <p><strong>Trainer:</strong> trainer@fitnesscoach.com / trainer123</p>
+              <p><strong>Client:</strong> john.smith@example.com / client123</p>
               <p><strong>Admin:</strong> admin@fitnesscoach.com / admin123</p>
             </div>
           </div>

@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { withAuth } from '@/context/AuthContext';
+import { withTrainerAuth } from '@/context/AuthContext';
 import { ClientService } from '@/services/clients';
 import type { ClientSummary } from '@/types/api';
+import CreateClientAccountModal from '@/components/clients/CreateClientAccountModal';
 import Link from 'next/link';
 import { 
   Users, 
@@ -30,6 +31,7 @@ function ClientsPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [filters, setFilters] = useState({
     activeOnly: true,
     sortBy: 'created_at',
@@ -114,13 +116,22 @@ function ClientsPage() {
                 Manage your client roster and track their fitness journeys.
               </p>
             </div>
-            <Link
-              href="/clients/create"
-              className="btn-primary inline-flex items-center space-x-2"
-            >
-              <UserPlus className="w-5 h-5" />
-              <span>Add New Client</span>
-            </Link>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="btn-primary inline-flex items-center space-x-2"
+              >
+                <UserPlus className="w-5 h-5" />
+                <span>Create Client Account</span>
+              </button>
+              <Link
+                href="/clients/create"
+                className="btn-secondary inline-flex items-center space-x-2"
+              >
+                <Plus className="w-5 h-5" />
+                <span>Add Client Info Only</span>
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -230,6 +241,16 @@ function ClientsPage() {
             )}
           </>
         )}
+
+        {/* Create Client Account Modal */}
+        <CreateClientAccountModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onSuccess={(clientData) => {
+            setShowCreateModal(false);
+            loadClients(); // Refresh the client list
+          }}
+        />
       </div>
     </div>
   );
@@ -270,4 +291,4 @@ function EmptyState({ searchTerm }: { searchTerm: string }) {
   );
 }
 
-export default withAuth(ClientsPage);
+export default withTrainerAuth(ClientsPage);

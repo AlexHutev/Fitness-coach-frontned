@@ -11,7 +11,7 @@ export interface User {
   bio?: string;
   is_active: boolean;
   is_verified: boolean;
-  role: 'TRAINER' | 'ADMIN';
+  role: 'trainer' | 'client' | 'admin';
   created_at: string;
   updated_at?: string;
   last_login?: string;
@@ -91,6 +91,21 @@ export interface CreateClientRequest {
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
   notes?: string;
+}
+
+export interface CreateClientAccountRequest {
+  email: string;
+  custom_password?: string;
+}
+
+export interface ClientAccountCreationResponse {
+  client: Client;
+  user_account: {
+    id: number;
+    email: string;
+    temporary_password: string;
+  };
+  message: string;
 }
 
 export interface UpdateUserRequest {
@@ -332,4 +347,171 @@ export interface BulkAssignmentRequest {
   client_ids: number[];
   start_date?: string;
   custom_notes?: string;
+}
+// Client Authentication Types
+export interface ClientLoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface ClientTokenResponse {
+  access_token: string;
+  token_type: string;
+  client_id: number;
+  assignment_id: number;
+  program_name: string;
+}
+
+// Client Dashboard Types
+export interface ClientDashboardProgram {
+  assignment_id: number;
+  program_id: number;
+  program_name: string;
+  program_description?: string;
+  program_type: string;
+  difficulty_level: string;
+  start_date: string;
+  end_date?: string;
+  status: AssignmentStatus;
+  total_workouts: number;
+  completed_workouts: number;
+  completion_percentage: number;
+  last_workout_date?: string;
+  next_workout_day?: number;
+}
+
+export interface ClientProgressStats {
+  total_programs: number;
+  active_programs: number;
+  completed_programs: number;
+  total_workouts_completed: number;
+  current_streak: number;
+  longest_streak: number;
+  average_workout_duration?: number;
+  average_perceived_exertion?: number;
+}
+
+export interface ClientDashboardResponse {
+  client_id: number;
+  client_name: string;
+  active_programs: ClientDashboardProgram[];
+  recent_workouts: WorkoutLogResponse[];
+  progress_stats: ClientProgressStats;
+}
+
+// Workout Tracking Types
+export interface ExerciseSetData {
+  set: number;
+  reps: number;
+  weight?: string;
+  completed: boolean;
+  notes?: string;
+  rest_seconds?: number;
+}
+
+export interface ExerciseLogCreate {
+  exercise_name: string;
+  exercise_id?: number;
+  exercise_order: number;
+  planned_sets?: number;
+  planned_reps?: string;
+  planned_weight?: string;
+  planned_rest_seconds?: number;
+  actual_sets: ExerciseSetData[];
+  difficulty_rating?: number;
+  exercise_notes?: string;
+  form_rating?: number;
+}
+
+export interface WorkoutLogCreate {
+  assignment_id: number;
+  day_number: number;
+  workout_name?: string;
+  workout_date?: string;
+  total_duration_minutes?: number;
+  perceived_exertion?: number;
+  client_notes?: string;
+  is_completed: boolean;
+  is_skipped: boolean;
+  skip_reason?: string;
+  exercises: ExerciseLogCreate[];
+}
+
+export interface ExerciseLogResponse {
+  id: number;
+  exercise_name: string;
+  exercise_id?: number;
+  exercise_order: number;
+  planned_sets?: number;
+  planned_reps?: string;
+  planned_weight?: string;
+  planned_rest_seconds?: number;
+  actual_sets: any[];
+  difficulty_rating?: number;
+  exercise_notes?: string;
+  form_rating?: number;
+  created_at: string;
+}
+
+export interface WorkoutLogResponse {
+  id: number;
+  assignment_id: number;
+  client_id: number;
+  workout_date: string;
+  day_number: number;
+  workout_name?: string;
+  total_duration_minutes?: number;
+  perceived_exertion?: number;
+  client_notes?: string;
+  trainer_feedback?: string;
+  is_completed: boolean;
+  is_skipped: boolean;
+  skip_reason?: string;
+  exercises: ExerciseLogResponse[];
+  created_at: string;
+}
+
+// Program Template Types (for client view)
+export interface WorkoutExerciseTemplate {
+  exercise_id?: number;
+  exercise_name: string;
+  sets: number;
+  reps: string;
+  weight?: string;
+  rest_seconds: number;
+  notes?: string;
+  muscle_groups?: string[];
+  equipment?: string[];
+  instructions?: string;
+}
+
+export interface WorkoutDayTemplate {
+  day: number;
+  name: string;
+  exercises: WorkoutExerciseTemplate[];
+}
+
+export interface ProgramTemplateForClient {
+  program_id: number;
+  assignment_id: number;
+  program_name: string;
+  program_description?: string;
+  program_type: string;
+  difficulty_level: string;
+  duration_weeks?: number;
+  sessions_per_week?: number;
+  workout_structure: WorkoutDayTemplate[];
+  trainer_notes?: string;
+}
+
+// Client Context Types
+export interface ClientAuthContextType {
+  clientId: number | null;
+  assignmentId: number | null;
+  programName: string | null;
+  token: string | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => void;
 }

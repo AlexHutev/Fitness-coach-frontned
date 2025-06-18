@@ -1,7 +1,6 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
-import { withAuth } from '@/context/AuthContext';
+import { useAuth, withTrainerAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import AssignmentDashboardCard from '@/components/programs/AssignmentDashboardCard';
 import { 
@@ -377,4 +376,4 @@ function QuickActionCard({
   );
 }
 
-export default withAuth(DashboardPage);
+export default withTrainerAuth(DashboardPage);

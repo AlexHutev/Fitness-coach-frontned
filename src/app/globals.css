@@ -21,13 +21,6 @@
   --radius: 0.5rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-}
-
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0f172a;
@@ -53,7 +46,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   font-variant-ligatures: contextual;
   -webkit-font-smoothing: antialiased;
@@ -79,70 +72,7 @@ body {
   background: #94a3b8;
 }
 
-/* Glass morphism effect */
-.glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Enhanced shadows */
-.shadow-soft {
-  box-shadow: 0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04);
-}
-
-.shadow-card {
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-}
-
-.shadow-card:hover {
-  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-/* Focus styles */
-.focus-ring:focus {
-  outline: 2px solid transparent;
-  outline-offset: 2px;
-  box-shadow: 0 0 0 2px var(--ring);
-}
-
-/* Button animations */
-.btn-primary {
-  @apply bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200;
-  @apply hover:bg-blue-700 hover:shadow-lg hover:scale-105;
-  @apply focus:outline-none focus:ring-4 focus:ring-blue-200;
-  @apply active:scale-95;
-}
-
-.btn-secondary {
-  @apply bg-white text-gray-700 px-6 py-3 rounded-lg font-semibold border border-gray-300 transition-all duration-200;
-  @apply hover:bg-gray-50 hover:shadow-md hover:scale-105;
-  @apply focus:outline-none focus:ring-4 focus:ring-gray-200;
-  @apply active:scale-95;
-}
-
-.btn-danger {
-  @apply bg-red-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200;
-  @apply hover:bg-red-700 hover:shadow-lg hover:scale-105;
-  @apply focus:outline-none focus:ring-4 focus:ring-red-200;
-  @apply active:scale-95;
-}
-
-/* Card animations */
-.card-hover {
-  @apply transition-all duration-300 ease-out;
-  @apply hover:shadow-xl hover:-translate-y-1;
-}
-
-/* Loading animations */
+/* Animation keyframes */
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -169,6 +99,13 @@ body {
   }
 }
 
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-spin {
   animation: spin 1s linear infinite;
 }
@@ -183,15 +120,9 @@ body {
 
 /* Page transitions */
 .page-transition {
-  @apply opacity-0 transform translate-y-4;
+  opacity: 0;
+  transform: translateY(1rem);
   animation: fadeInUp 0.5s ease-out forwards;
-}
-
-@keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 /* Typography enhancements */
@@ -199,19 +130,6 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.025em;
-}
-
-/* Input enhancements */
-input[type="text"], 
-input[type="email"], 
-input[type="password"], 
-input[type="number"], 
-input[type="url"], 
-textarea, 
-select {
-  @apply transition-all duration-200;
-  @apply focus:ring-2 focus:ring-blue-500 focus:border-transparent;
-  @apply border-gray-300 rounded-lg;
 }
 
 /* Enhanced transitions for all interactive elements */

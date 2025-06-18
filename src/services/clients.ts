@@ -5,6 +5,8 @@ import type {
   Client,
   ClientSummary,
   CreateClientRequest,
+  CreateClientAccountRequest,
+  ClientAccountCreationResponse,
 } from '@/types/api';
 
 export interface GetClientsParams {
@@ -37,6 +39,35 @@ export class ClientService {
   static async getClientById(clientId: number) {
     const response = await apiClient.get<Client>(
       API_ENDPOINTS.CLIENT_BY_ID(clientId)
+    );
+    return response;
+  }
+
+  /**
+   * Create new client with login account
+   */
+  static async createClientWithAccount(clientData: CreateClientRequest) {
+    const response = await apiClient.post<ClientAccountCreationResponse>(
+      `${API_ENDPOINTS.CLIENTS}/with-account`,
+      clientData
+    );
+    return response;
+  }
+
+  /**
+   * Create login account for existing client
+   */
+  static async createAccountForClient(clientId: number, accountData: CreateClientAccountRequest) {
+    const response = await apiClient.post<{
+      user_account: {
+        id: number;
+        email: string;
+        temporary_password: string;
+      };
+      message: string;
+    }>(
+      `${API_ENDPOINTS.CLIENTS}/${clientId}/create-account`,
+      accountData
     );
     return response;
   }

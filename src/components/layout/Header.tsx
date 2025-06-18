@@ -34,14 +34,22 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
-            {isAuthenticated ? (
-              <>
-                <NavLink href="/dashboard">Dashboard</NavLink>
-                <NavLink href="/clients">Clients</NavLink>
-                <NavLink href="/programs">Programs</NavLink>
-                <NavLink href="/programs/assignments">Assignments</NavLink>
-                <NavLink href="/exercises">Exercises</NavLink>
-              </>
+            {isAuthenticated && user ? (
+              user.role === 'client' ? (
+                <>
+                  <NavLink href="/client/dashboard">Dashboard</NavLink>
+                  <NavLink href="/client/programs">My Programs</NavLink>
+                  <NavLink href="/client/progress">Progress</NavLink>
+                </>
+              ) : (
+                <>
+                  <NavLink href="/dashboard">Dashboard</NavLink>
+                  <NavLink href="/clients">Clients</NavLink>
+                  <NavLink href="/programs">Programs</NavLink>
+                  <NavLink href="/programs/assignments">Assignments</NavLink>
+                  <NavLink href="/exercises">Exercises</NavLink>
+                </>
+              )
             ) : (
               <>
                 <NavLink href="#features">Features</NavLink>
@@ -151,54 +159,38 @@ export default function Header() {
         {isMenuOpen && (
           <div className="md:hidden border-t border-gray-200 bg-white">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {isAuthenticated ? (
-                <>
-                  <MobileNavLink href="/dashboard" onClick={() => setIsMenuOpen(false)}>
-                    Dashboard
-                  </MobileNavLink>
-                  <MobileNavLink href="/clients" onClick={() => setIsMenuOpen(false)}>
-                    Clients
-                  </MobileNavLink>
-                  <MobileNavLink href="/programs" onClick={() => setIsMenuOpen(false)}>
-                    Programs
-                  </MobileNavLink>
-                  <MobileNavLink href="/programs/assignments" onClick={() => setIsMenuOpen(false)}>
-                    Assignments
-                  </MobileNavLink>
-                  <MobileNavLink href="/exercises" onClick={() => setIsMenuOpen(false)}>
-                    Exercises
-                  </MobileNavLink>
-                  
-                  {user && (
-                    <div className="border-t pt-4 mt-4">
-                      <div className="flex items-center px-3 py-2 mb-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mr-3">
-                          <span className="text-sm font-semibold text-white">
-                            {user.first_name?.[0]}{user.last_name?.[0]}
-                          </span>
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {user.first_name} {user.last_name}
-                          </div>
-                          <div className="text-xs text-gray-500">{user.email}</div>
-                        </div>
-                      </div>
-                      <MobileNavLink href="/profile" onClick={() => setIsMenuOpen(false)}>
-                        Profile
-                      </MobileNavLink>
-                      <MobileNavLink href="/settings" onClick={() => setIsMenuOpen(false)}>
-                        Settings
-                      </MobileNavLink>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left text-red-600 hover:bg-red-50 block px-3 py-2 rounded-md text-base font-medium transition-colors"
-                      >
-                        Sign out
-                      </button>
-                    </div>
-                  )}
-                </>
+              {isAuthenticated && user ? (
+                user.role === 'client' ? (
+                  <>
+                    <MobileNavLink href="/client/dashboard" onClick={() => setIsMenuOpen(false)}>
+                      Dashboard
+                    </MobileNavLink>
+                    <MobileNavLink href="/client/programs" onClick={() => setIsMenuOpen(false)}>
+                      My Programs
+                    </MobileNavLink>
+                    <MobileNavLink href="/client/progress" onClick={() => setIsMenuOpen(false)}>
+                      Progress
+                    </MobileNavLink>
+                  </>
+                ) : (
+                  <>
+                    <MobileNavLink href="/dashboard" onClick={() => setIsMenuOpen(false)}>
+                      Dashboard
+                    </MobileNavLink>
+                    <MobileNavLink href="/clients" onClick={() => setIsMenuOpen(false)}>
+                      Clients
+                    </MobileNavLink>
+                    <MobileNavLink href="/programs" onClick={() => setIsMenuOpen(false)}>
+                      Programs
+                    </MobileNavLink>
+                    <MobileNavLink href="/programs/assignments" onClick={() => setIsMenuOpen(false)}>
+                      Assignments
+                    </MobileNavLink>
+                    <MobileNavLink href="/exercises" onClick={() => setIsMenuOpen(false)}>
+                      Exercises
+                    </MobileNavLink>
+                  </>
+                )
               ) : (
                 <>
                   <MobileNavLink href="#features" onClick={() => setIsMenuOpen(false)}>
@@ -207,23 +199,56 @@ export default function Header() {
                   <MobileNavLink href="#about" onClick={() => setIsMenuOpen(false)}>
                     About
                   </MobileNavLink>
-                  <div className="border-t pt-4 mt-4 space-y-2">
-                    <Link
-                      href="/auth/login"
-                      className="block w-full text-center bg-gray-100 text-gray-700 px-3 py-2 rounded-lg font-medium"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Sign in
-                    </Link>
-                    <Link
-                      href="/auth/register"
-                      className="block w-full text-center btn-primary"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Get Started
-                    </Link>
-                  </div>
                 </>
+              )}
+              
+              {user && (
+                <div className="border-t pt-4 mt-4">
+                  <div className="flex items-center px-3 py-2 mb-2">
+                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mr-3">
+                      <span className="text-sm font-semibold text-white">
+                        {user.first_name?.[0]}{user.last_name?.[0]}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {user.first_name} {user.last_name}
+                      </div>
+                      <div className="text-xs text-gray-500">{user.email}</div>
+                    </div>
+                  </div>
+                  <MobileNavLink href="/profile" onClick={() => setIsMenuOpen(false)}>
+                    Profile
+                  </MobileNavLink>
+                  <MobileNavLink href="/settings" onClick={() => setIsMenuOpen(false)}>
+                    Settings
+                  </MobileNavLink>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left text-red-600 hover:bg-red-50 block px-3 py-2 rounded-md text-base font-medium transition-colors"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              )}
+
+              {!isAuthenticated && (
+                <div className="border-t pt-4 mt-4 space-y-2">
+                  <Link
+                    href="/auth/login"
+                    className="block w-full text-center bg-gray-100 text-gray-700 px-3 py-2 rounded-lg font-medium"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    href="/auth/register"
+                    className="block w-full text-center btn-primary"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Get Started
+                  </Link>
+                </div>
               )}
             </div>
           </div>
