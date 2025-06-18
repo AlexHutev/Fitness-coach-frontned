@@ -36,6 +36,9 @@ export default function CreateClientAccountModal({
     primary_goal: undefined,
   });
 
+  const [passwordOption, setPasswordOption] = useState<'generate' | 'custom'>('generate');
+  const [customPassword, setCustomPassword] = useState('');
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -50,7 +53,12 @@ export default function CreateClientAccountModal({
     setError(null);
 
     try {
-      const response = await ClientService.createClientWithAccount(formData);
+      const requestData = {
+        ...formData,
+        custom_password: passwordOption === 'custom' ? customPassword : undefined
+      };
+      
+      const response = await ClientService.createClientWithAccount(requestData);
       
       if (response.success) {
         setAccountInfo({
@@ -64,7 +72,24 @@ export default function CreateClientAccountModal({
         setError('Failed to create client account');
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to create client account');
+      console.error('Error creating client account:', err);
+      
+      // Handle specific error cases
+      let errorMessage = 'Failed to create client account';
+      
+      if (err.response?.data?.detail) {
+        const detail = err.response.data.detail;
+        
+        if (detail.includes('UNIQUE constraint failed: users.email')) {
+          errorMessage = `The email address "${formData.email}" is already registered. Please use a different email address.`;
+        } else if (detail.includes('IntegrityError')) {
+          errorMessage = 'This email address is already in use. Please choose a different one.';
+        } else {
+          errorMessage = detail;
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -86,6 +111,8 @@ export default function CreateClientAccountModal({
       activity_level: undefined,
       primary_goal: undefined,
     });
+    setPasswordOption('generate');
+    setCustomPassword('');
     setAccountInfo(null);
     setError(null);
     onClose();
@@ -176,6 +203,58 @@ export default function CreateClientAccountModal({
                 </div>
               </div>
 
+              {/* Password Section */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Password Setup
+                  </label>
+                  <div className="space-y-3">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="passwordOption"
+                        value="generate"
+                        checked={passwordOption === 'generate'}
+                        onChange={(e) => setPasswordOption(e.target.value as 'generate')}
+                        className="mr-3"
+                      />
+                      <span className="text-sm text-gray-700">Generate temporary password automatically</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="passwordOption"
+                        value="custom"
+                        checked={passwordOption === 'custom'}
+                        onChange={(e) => setPasswordOption(e.target.value as 'custom')}
+                        className="mr-3"
+                      />
+                      <span className="text-sm text-gray-700">Set custom password</span>
+                    </label>
+                  </div>
+                </div>
+
+                {passwordOption === 'custom' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Custom Password *
+                    </label>
+                    <input
+                      type="password"
+                      value={customPassword}
+                      onChange={(e) => setCustomPassword(e.target.value)}
+                      placeholder="Enter password for client"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      minLength={6}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Password must be at least 6 characters long
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {/* Physical Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -264,7 +343,7 @@ export default function CreateClientAccountModal({
                 </button>
                 <button
                   type="submit"
-                  disabled={loading || !formData.first_name || !formData.last_name || !formData.email}
+                  disabled={loading || !formData.first_name || !formData.last_name || !formData.email || (passwordOption === 'custom' && (!customPassword || customPassword.length < 6))}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                 >
                   {loading ? (
@@ -321,7 +400,9 @@ export default function CreateClientAccountModal({
                   <div className="flex items-center justify-between p-3 bg-white rounded border">
                     <div className="flex items-center">
                       <Lock className="w-4 h-4 text-gray-500 mr-2" />
-                      <span className="text-sm text-gray-600">Temporary Password:</span>
+                      <span className="text-sm text-gray-600">
+                        {passwordOption === 'custom' ? 'Custom Password:' : 'Temporary Password:'}
+                      </span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <span className="font-mono text-sm bg-yellow-100 px-2 py-1 rounded">
@@ -340,7 +421,10 @@ export default function CreateClientAccountModal({
                 <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
                   <p className="text-sm text-blue-800">
                     <strong>Important:</strong> Share these credentials with your client. 
-                    They should change their password on first login.
+                    {passwordOption === 'custom' 
+                      ? ' They can log in immediately with this password.'
+                      : ' They should change their password on first login.'
+                    }
                   </p>
                 </div>
               </div>

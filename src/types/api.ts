@@ -91,6 +91,7 @@ export interface CreateClientRequest {
   emergency_contact_name?: string;
   emergency_contact_phone?: string;
   notes?: string;
+  custom_password?: string;
 }
 
 export interface CreateClientAccountRequest {
