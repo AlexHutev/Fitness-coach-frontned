@@ -43,23 +43,20 @@ export default function ProgramAssign({
     setIsLoading(true);
     setError(''); // Clear any previous errors
     try {
-      const [programsResponse, clientsResponse] = await Promise.all([
+      const [programsData, clientsData] = await Promise.all([
         ProgramService.getPrograms({ is_template: true }),
         ClientService.getClients()
       ]);
       
       // Handle programs response  
-      setPrograms(programsResponse);
+      setPrograms(Array.isArray(programsData) ? programsData : []);
       
-      // Handle clients response - ClientService.getClients() returns a response object
-      if (clientsResponse.data && Array.isArray(clientsResponse.data)) {
-        const activeClients = clientsResponse.data.filter(client => client.is_active);
+      // Handle clients response
+      if (Array.isArray(clientsData)) {
+        const activeClients = clientsData.filter(client => client.is_active);
         setClients(activeClients);
-      } else if (clientsResponse.error) {
-        throw new Error(clientsResponse.error);
       } else {
-        // If data is not an array, log the issue
-        console.error('Unexpected clients response format:', clientsResponse);
+        console.error('Unexpected clients response format:', clientsData);
         setClients([]);
       }
       
@@ -69,6 +66,8 @@ export default function ProgramAssign({
                           typeof err === 'string' ? err : 
                           'Failed to load data';
       setError(errorMessage);
+      setPrograms([]);
+      setClients([]);
     } finally {
       setIsLoading(false);
     }

@@ -48,21 +48,18 @@ function ClientsPage() {
       setLoading(true);
       setError(null);
       
-      const response = await ClientService.getClients({
+      const clientData = await ClientService.getClients({
         skip: pagination.skip,
         limit: pagination.limit,
         active_only: filters.activeOnly,
         search: searchTerm || undefined
       });
 
-      if (response.error) {
-        setError(response.error);
-      } else if (response.data) {
-        setClients(response.data);
-      }
+      setClients(Array.isArray(clientData) ? clientData : []);
     } catch (err) {
       setError('Failed to load clients. Please try again.');
       console.error('Error loading clients:', err);
+      setClients([]); // Set empty array on error
     } finally {
       setLoading(false);
     }

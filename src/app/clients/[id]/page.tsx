@@ -52,15 +52,11 @@ function ClientDetailPage() {
         setLoading(true);
         setError(null);
         
-        const response = await ClientService.getClientById(clientId);
-        
-        if (response.error) {
-          setError(response.error);
-        } else if (response.data) {
-          setClient(response.data);
-        }
+        const clientData = await ClientService.getClientById(clientId);
+        setClient(clientData);
       } catch (err) {
-        setError('Failed to load client details. Please try again.');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load client details. Please try again.';
+        setError(errorMessage);
         console.error('Error loading client:', err);
       } finally {
         setLoading(false);

@@ -27,10 +27,10 @@ export class ProgramAssignmentService {
       }
     );
     
-    if (response.error || !response.data) {
-      throw new Error(response.error || 'Failed to assign program');
+    if (response.error) {
+      throw new Error(response.error);
     }
-    return response.data;
+    return response.data || [];
   }
 
   // Get all program assignments for the current trainer
@@ -54,10 +54,10 @@ export class ProgramAssignmentService {
       { params: apiParams }
     );
     
-    if (response.error || !response.data) {
-      throw new Error(response.error || 'Failed to fetch assignments');
+    if (response.error) {
+      throw new Error(response.error);
     }
-    return response.data;
+    return response.data || [];
   }
 
   // Get a specific assignment by ID
@@ -66,10 +66,10 @@ export class ProgramAssignmentService {
       API_ENDPOINTS.PROGRAM_ASSIGNMENT_BY_ID(assignmentId)
     );
     
-    if (response.error || !response.data) {
-      throw new Error(response.error || 'Failed to fetch assignment');
+    if (response.error) {
+      throw new Error(response.error);
     }
-    return response.data;
+    return response.data!;
   }
   // Update an assignment
   static async updateAssignment(
@@ -81,10 +81,10 @@ export class ProgramAssignmentService {
       updateData
     );
     
-    if (response.error || !response.data) {
-      throw new Error(response.error || 'Failed to update assignment');
+    if (response.error) {
+      throw new Error(response.error);
     }
-    return response.data;
+    return response.data!;
   }
 
   // Update assignment progress
@@ -97,10 +97,10 @@ export class ProgramAssignmentService {
       progressData
     );
     
-    if (response.error || !response.data) {
-      throw new Error(response.error || 'Failed to update progress');
+    if (response.error) {
+      throw new Error(response.error);
     }
-    return response.data;
+    return response.data!;
   }
 
   // Cancel an assignment
@@ -110,7 +110,7 @@ export class ProgramAssignmentService {
     );
     
     if (response.error) {
-      throw new Error(response.error || 'Failed to cancel assignment');
+      throw new Error(response.error);
     }
   }
 
@@ -121,7 +121,7 @@ export class ProgramAssignmentService {
     );
     
     if (response.error) {
-      throw new Error(response.error || 'Failed to fetch client assignment');
+      throw new Error(response.error);
     }
     return response.data || null;
   }

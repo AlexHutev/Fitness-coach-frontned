@@ -57,35 +57,32 @@ function EditClientPage() {
     const loadClient = async () => {
       try {
         setLoading(true);
-        const response = await ClientService.getClientById(clientId);
+        const clientData = await ClientService.getClientById(clientId);
         
-        if (response.error) {
-          setErrors({ general: response.error });
-        } else if (response.data) {
-          setClient(response.data);
-          // Populate form with existing data
-          setFormData({
-            first_name: response.data.first_name,
-            last_name: response.data.last_name,
-            email: response.data.email || '',
-            phone_number: response.data.phone_number || '',
-            date_of_birth: response.data.date_of_birth || '',
-            gender: response.data.gender,
-            height: response.data.height,
-            weight: response.data.weight,
-            body_fat_percentage: response.data.body_fat_percentage,
-            activity_level: response.data.activity_level,
-            primary_goal: response.data.primary_goal,
-            secondary_goals: response.data.secondary_goals || '',
-            medical_conditions: response.data.medical_conditions || '',
-            injuries: response.data.injuries || '',
-            emergency_contact_name: response.data.emergency_contact_name || '',
-            emergency_contact_phone: response.data.emergency_contact_phone || '',
-            notes: response.data.notes || ''
-          });
-        }
+        setClient(clientData);
+        // Populate form with existing data
+        setFormData({
+          first_name: clientData.first_name,
+          last_name: clientData.last_name,
+          email: clientData.email || '',
+          phone_number: clientData.phone_number || '',
+          date_of_birth: clientData.date_of_birth || '',
+          gender: clientData.gender,
+          height: clientData.height,
+          weight: clientData.weight,
+          body_fat_percentage: clientData.body_fat_percentage,
+          activity_level: clientData.activity_level,
+          primary_goal: clientData.primary_goal,
+          secondary_goals: clientData.secondary_goals || '',
+          medical_conditions: clientData.medical_conditions || '',
+          injuries: clientData.injuries || '',
+          emergency_contact_name: clientData.emergency_contact_name || '',
+          emergency_contact_phone: clientData.emergency_contact_phone || '',
+          notes: clientData.notes || ''
+        });
       } catch (err) {
-        setErrors({ general: 'Failed to load client details.' });
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load client details.';
+        setErrors({ general: errorMessage });
         console.error('Error loading client:', err);
       } finally {
         setLoading(false);
@@ -143,16 +140,12 @@ function EditClientPage() {
 
     try {
       setSaving(true);
-      const response = await ClientService.updateClient(clientId, formData);
-      
-      if (response.error) {
-        setErrors({ general: response.error });
-      } else if (response.data) {
-        router.push(`/clients/${clientId}`);
-      }
+      const updatedClient = await ClientService.updateClient(clientId, formData);
+      router.push(`/clients/${clientId}`);
     } catch (error) {
       console.error('Error updating client:', error);
-      setErrors({ general: 'Failed to update client. Please try again.' });
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update client. Please try again.';
+      setErrors({ general: errorMessage });
     } finally {
       setSaving(false);
     }
@@ -161,16 +154,12 @@ function EditClientPage() {
   const handleDelete = async () => {
     try {
       setSaving(true);
-      const response = await ClientService.deleteClient(clientId);
-      
-      if (response.error) {
-        setErrors({ general: response.error });
-      } else {
-        router.push('/clients');
-      }
+      await ClientService.deleteClient(clientId);
+      router.push('/clients');
     } catch (error) {
       console.error('Error deleting client:', error);
-      setErrors({ general: 'Failed to delete client. Please try again.' });
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete client. Please try again.';
+      setErrors({ general: errorMessage });
     } finally {
       setSaving(false);
       setShowDeleteConfirm(false);

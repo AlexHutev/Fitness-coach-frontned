@@ -92,16 +92,12 @@ function CreateClientPage() {
 
     try {
       setLoading(true);
-      const response = await ClientService.createClient(formData);
-      
-      if (response.error) {
-        setErrors({ general: response.error });
-      } else if (response.data) {
-        router.push(`/clients/${response.data.id}`);
-      }
+      const newClient = await ClientService.createClient(formData);
+      router.push(`/clients/${newClient.id}`);
     } catch (error) {
       console.error('Error creating client:', error);
-      setErrors({ general: 'Failed to create client. Please try again.' });
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create client. Please try again.';
+      setErrors({ general: errorMessage });
     } finally {
       setLoading(false);
     }

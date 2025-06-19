@@ -21,13 +21,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const storedToken = AuthService.getToken();
         if (storedToken) {
-          const userResponse = await AuthService.getCurrentUser();
-          if (userResponse.data) {
-            setUser(userResponse.data);
+          const userData = await AuthService.getCurrentUser();
+          if (userData) {
+            setUser(userData);
             setToken(storedToken);
             // Store user data in localStorage
             if (typeof window !== 'undefined') {
-              localStorage.setItem('user', JSON.stringify(userResponse.data));
+              localStorage.setItem('user', JSON.stringify(userData));
             }
           } else {
             // Token is invalid, remove it
@@ -55,18 +55,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setIsLoading(true);
       
-      const response = await AuthService.login({ email, password });
+      const authData = await AuthService.login({ email, password });
       
-      if (response.data) {
-        setToken(response.data.access_token);
+      if (authData) {
+        setToken(authData.access_token);
         
         // Get user data
-        const userResponse = await AuthService.getCurrentUser();
-        if (userResponse.data) {
-          setUser(userResponse.data);
+        const userData = await AuthService.getCurrentUser();
+        if (userData) {
+          setUser(userData);
           // Store user data in localStorage for redirect logic
           if (typeof window !== 'undefined') {
-            localStorage.setItem('user', JSON.stringify(userResponse.data));
+            localStorage.setItem('user', JSON.stringify(userData));
           }
           return true;
         }
@@ -85,9 +85,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setIsLoading(true);
       
-      const response = await AuthService.register(data);
+      const userData = await AuthService.register(data);
       
-      if (response.data) {
+      if (userData) {
         // Auto-login after registration
         return await login(data.email, data.password);
       }
@@ -113,10 +113,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const updateUser = async (data: UpdateUserRequest): Promise<boolean> => {
     try {
-      const response = await AuthService.updateProfile(data);
+      const userData = await AuthService.updateProfile(data);
       
-      if (response.data) {
-        setUser(response.data);
+      if (userData) {
+        setUser(userData);
         return true;
       }
       
@@ -129,9 +129,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const refreshUser = async (): Promise<void> => {
     try {
-      const response = await AuthService.getCurrentUser();
-      if (response.data) {
-        setUser(response.data);
+      const userData = await AuthService.getCurrentUser();
+      if (userData) {
+        setUser(userData);
       }
     } catch (error) {
       console.error('Refresh user error:', error);

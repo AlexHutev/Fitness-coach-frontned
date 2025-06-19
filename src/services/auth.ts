@@ -20,13 +20,16 @@ export class AuthService {
       credentials
     );
 
+    if (response.error) {
+      throw new Error(response.error);
+    }
+
     if (response.data) {
       // Store the token
       apiClient.setToken(response.data.access_token);
-      return response;
     }
 
-    return response;
+    return response.data;
   }
 
   /**
@@ -38,7 +41,11 @@ export class AuthService {
       userData
     );
 
-    return response;
+    if (response.error) {
+      throw new Error(response.error);
+    }
+
+    return response.data;
   }
 
   /**
@@ -46,7 +53,12 @@ export class AuthService {
    */
   static async getCurrentUser() {
     const response = await apiClient.get<User>(API_ENDPOINTS.ME);
-    return response;
+    
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    
+    return response.data;
   }
 
   /**
@@ -54,7 +66,12 @@ export class AuthService {
    */
   static async updateProfile(userData: UpdateUserRequest) {
     const response = await apiClient.put<User>(API_ENDPOINTS.ME, userData);
-    return response;
+    
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    
+    return response.data;
   }
 
   /**
@@ -65,7 +82,12 @@ export class AuthService {
       API_ENDPOINTS.CHANGE_PASSWORD,
       passwordData
     );
-    return response;
+    
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    
+    return response.data;
   }
 
   /**
@@ -73,7 +95,12 @@ export class AuthService {
    */
   static async verifyToken() {
     const response = await apiClient.post(API_ENDPOINTS.VERIFY_TOKEN);
-    return response;
+    
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    
+    return response.data;
   }
 
   /**

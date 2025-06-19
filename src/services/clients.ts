@@ -30,7 +30,12 @@ export class ClientService {
 
     const endpoint = `${API_ENDPOINTS.CLIENTS}?${queryParams.toString()}`;
     const response = await apiClient.get<ClientSummary[]>(endpoint);
-    return response;
+    
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    
+    return response.data || [];
   }
 
   /**
@@ -40,7 +45,12 @@ export class ClientService {
     const response = await apiClient.get<Client>(
       API_ENDPOINTS.CLIENT_BY_ID(clientId)
     );
-    return response;
+    
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    
+    return response.data;
   }
 
   /**
@@ -51,7 +61,12 @@ export class ClientService {
       `${API_ENDPOINTS.CLIENTS}/with-account`,
       clientData
     );
-    return response;
+    
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    
+    return response.data;
   }
 
   /**
@@ -69,7 +84,12 @@ export class ClientService {
       `${API_ENDPOINTS.CLIENTS}/${clientId}/create-account`,
       accountData
     );
-    return response;
+    
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    
+    return response.data;
   }
 
   /**
@@ -80,7 +100,12 @@ export class ClientService {
       API_ENDPOINTS.CLIENTS,
       clientData
     );
-    return response;
+    
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    
+    return response.data;
   }
 
   /**
@@ -91,7 +116,12 @@ export class ClientService {
       API_ENDPOINTS.CLIENT_BY_ID(clientId),
       clientData
     );
-    return response;
+    
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    
+    return response.data;
   }
 
   /**
@@ -101,7 +131,12 @@ export class ClientService {
     const response = await apiClient.delete(
       API_ENDPOINTS.CLIENT_BY_ID(clientId)
     );
-    return response;
+    
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    
+    return response.data;
   }
 
   /**
@@ -113,6 +148,11 @@ export class ClientService {
 
     const endpoint = `${API_ENDPOINTS.CLIENT_COUNT}?${queryParams.toString()}`;
     const response = await apiClient.get<{ count: number }>(endpoint);
-    return response;
+    
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    
+    return response.data;
   }
 }

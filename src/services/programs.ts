@@ -5,10 +5,10 @@ export class ProgramService {
   // Create a new program
   static async createProgram(programData: CreateProgram): Promise<Program> {
     const response = await apiClient.post<Program>(API_ENDPOINTS.PROGRAMS, programData);
-    if (response.error || !response.data) {
-      throw new Error(response.error || 'Failed to create program');
+    if (response.error) {
+      throw new Error(response.error);
     }
-    return response.data;
+    return response.data!;
   }
 
   // Get all programs for the current trainer
@@ -20,54 +20,54 @@ export class ProgramService {
     is_template?: boolean;
   }): Promise<ProgramList[]> {
     const response = await apiClient.get<ProgramList[]>(API_ENDPOINTS.PROGRAMS, { params });
-    if (response.error || !response.data) {
-      throw new Error(response.error || 'Failed to fetch programs');
+    if (response.error) {
+      throw new Error(response.error);
     }
-    return response.data;
+    return response.data || [];
   }
 
   // Get a specific program by ID
   static async getProgram(programId: number): Promise<Program> {
     const response = await apiClient.get<Program>(API_ENDPOINTS.PROGRAM_BY_ID(programId));
-    if (response.error || !response.data) {
-      throw new Error(response.error || 'Failed to fetch program');
+    if (response.error) {
+      throw new Error(response.error);
     }
-    return response.data;
+    return response.data!;
   }
 
   // Update an existing program
   static async updateProgram(programId: number, updateData: UpdateProgram): Promise<Program> {
     const response = await apiClient.put<Program>(API_ENDPOINTS.PROGRAM_BY_ID(programId), updateData);
-    if (response.error || !response.data) {
-      throw new Error(response.error || 'Failed to update program');
+    if (response.error) {
+      throw new Error(response.error);
     }
-    return response.data;
+    return response.data!;
   }
 
   // Delete a program
   static async deleteProgram(programId: number): Promise<void> {
     const response = await apiClient.delete(API_ENDPOINTS.PROGRAM_BY_ID(programId));
     if (response.error) {
-      throw new Error(response.error || 'Failed to delete program');
+      throw new Error(response.error);
     }
   }
 
   // Duplicate a program
   static async duplicateProgram(programId: number, newName: string): Promise<Program> {
     const response = await apiClient.post<Program>(API_ENDPOINTS.PROGRAM_DUPLICATE(programId), null, { params: { new_name: newName } });
-    if (response.error || !response.data) {
-      throw new Error(response.error || 'Failed to duplicate program');
+    if (response.error) {
+      throw new Error(response.error);
     }
-    return response.data;
+    return response.data!;
   }
 
   // Search programs
   static async searchPrograms(searchTerm: string): Promise<ProgramList[]> {
     const response = await apiClient.get<ProgramList[]>(API_ENDPOINTS.PROGRAMS_SEARCH, { params: { search_term: searchTerm } });
-    if (response.error || !response.data) {
-      throw new Error(response.error || 'Failed to search programs');
+    if (response.error) {
+      throw new Error(response.error);
     }
-    return response.data;
+    return response.data || [];
   }
 }
 // Program utility functions

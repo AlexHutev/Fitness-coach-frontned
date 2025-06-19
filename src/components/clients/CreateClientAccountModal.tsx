@@ -60,17 +60,13 @@ export default function CreateClientAccountModal({
       
       const response = await ClientService.createClientWithAccount(requestData);
       
-      if (response.data && !response.error) {
-        setAccountInfo({
-          email: response.data.user_account.email,
-          password: response.data.user_account.temporary_password,
-          clientName: `${formData.first_name} ${formData.last_name}`
-        });
-        setStep('success');
-        onSuccess(response.data);
-      } else {
-        setError(response.error || 'Failed to create client account');
-      }
+      setAccountInfo({
+        email: response.user_account.email,
+        password: response.user_account.temporary_password,
+        clientName: `${formData.first_name} ${formData.last_name}`
+      });
+      setStep('success');
+      onSuccess(response);
     } catch (err: any) {
       console.error('Error creating client account:', err);
       

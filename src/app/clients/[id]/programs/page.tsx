@@ -49,22 +49,21 @@ function ClientProgramsPage() {
       setError(null);
 
       // Load client data and assignments in parallel
-      const [clientResponse, assignmentsData, programsData] = await Promise.all([
+      const [clientData, assignmentsData, programsData] = await Promise.all([
         ClientService.getClientById(clientId),
         ProgramAssignmentService.getAssignments({ client_id: clientId }),
         ProgramService.getPrograms({ is_template: true })
       ]);
 
-      if (clientResponse.error || !clientResponse.data) {
-        throw new Error(clientResponse.error || 'Failed to load client data');
-      }
-
-      setClient(clientResponse.data);
-      setAssignments(assignmentsData);
-      setAvailablePrograms(programsData);
+      setClient(clientData);
+      setAssignments(Array.isArray(assignmentsData) ? assignmentsData : []);
+      setAvailablePrograms(Array.isArray(programsData) ? programsData : []);
     } catch (err) {
       console.error('Error loading client programs:', err);
       setError(err instanceof Error ? err.message : 'Failed to load data');
+      setClient(null);
+      setAssignments([]);
+      setAvailablePrograms([]);
     } finally {
       setLoading(false);
     }
