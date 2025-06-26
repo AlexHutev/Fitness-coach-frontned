@@ -17,20 +17,75 @@ function ClientDashboard() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [profileRes, statsRes, programsRes] = await Promise.all([
-          ClientDashboardService.getClientProfile(),
-          ClientDashboardService.getDashboardStats(),
-          ClientDashboardService.getClientPrograms()
-        ]);
-
-        if (profileRes.success) setProfile(profileRes.data);
-        if (statsRes.success) setStats(statsRes.data);
-        if (programsRes.success) setPrograms(programsRes.data);
+        console.log('🚀 Starting client dashboard data fetch...');
+        
+        // Fetch profile data
+        try {
+          console.log('📱 Fetching profile...');
+          const profileRes = await ClientDashboardService.getClientProfile();
+          console.log('📱 Profile response:', profileRes);
+          if (profileRes.data) {
+            setProfile(profileRes.data);
+            console.log('✅ Profile set successfully:', profileRes.data);
+          } else {
+            console.log('❌ Profile response has no data:', profileRes);
+          }
+        } catch (err) {
+          console.error('❌ Profile fetch error:', err);
+        }
+        
+        // Fetch programs data  
+        try {
+          console.log('📚 Fetching programs...');
+          const programsRes = await ClientDashboardService.getClientPrograms();
+          console.log('📚 Programs response:', programsRes);
+          if (programsRes.data) {
+            setPrograms(programsRes.data);
+            console.log('✅ Programs set successfully:', programsRes.data);
+            console.log('📊 Programs.assigned_programs:', programsRes.data.assigned_programs);
+            console.log('📊 Programs.assigned_programs.length:', programsRes.data.assigned_programs?.length);
+          } else {
+            console.log('❌ Programs response has no data:', programsRes);
+          }
+        } catch (err) {
+          console.error('❌ Programs fetch error:', err);
+        }
+        
+        // Fetch stats data (optional - don't fail if this doesn't work)
+        try {
+          console.log('📈 Fetching stats...');
+          const statsRes = await ClientDashboardService.getDashboardStats();
+          console.log('📈 Stats response:', statsRes);
+          if (statsRes.data) {
+            setStats(statsRes.data);
+            console.log('✅ Stats set successfully:', statsRes.data);
+          } else {
+            console.log('⚠️ Stats response has no data, using defaults');
+            // Set default stats so the page still works
+            setStats({
+              profile_completion: { percentage: 50, missing_fields: [] },
+              health_metrics: {},
+              program_stats: { active_programs: 0, completed_workouts: 0, current_streak: 0 }
+            });
+          }
+        } catch (err) {
+          console.error('⚠️ Stats fetch error (non-critical):', err);
+          // Set default stats so the page still works
+          setStats({
+            profile_completion: { percentage: 50, missing_fields: [] },
+            health_metrics: {},
+            program_stats: { active_programs: 0, completed_workouts: 0, current_streak: 0 }
+          });
+        }
+        
+        console.log('🏁 Data fetch complete');
+        
       } catch (err) {
-        setError('Failed to load dashboard data');
-        console.error('Dashboard error:', err);
+        console.error('💥 General dashboard error:', err);
+        setError('Failed to load some dashboard data');
       } finally {
         setLoading(false);
+        console.log('🔄 Loading set to false');
       }
     };
 
@@ -176,12 +231,55 @@ function ClientDashboard() {
                     </div>
                   </div>
                   <div className="p-6">
-                    {programs?.assigned_programs.length > 0 ? (
+                    {/* Debug info */}
+                    {process.env.NODE_ENV === 'development' && (
+                      <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                        <div className="text-xs text-yellow-800">
+                          <strong>Debug Info:</strong><br/>
+                          Programs data: {programs ? 'LOADED' : 'NULL'}<br/>
+                          Assigned programs: {programs?.assigned_programs ? `${programs.assigned_programs.length} found` : 'NONE'}<br/>
+                          Profile: {profile ? 'LOADED' : 'NULL'}<br/>
+                          Stats: {stats ? 'LOADED' : 'NULL'}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {programs?.assigned_programs && programs.assigned_programs.length > 0 ? (
                       <div className="space-y-4">
                         {programs.assigned_programs.map((program: any, index: number) => (
                           <div key={index} className="border rounded-lg p-4">
-                            <h3 className="font-medium text-gray-900">{program.name}</h3>
-                            <p className="text-gray-600 text-sm">{program.description}</p>
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="font-medium text-gray-900">{program.program_name}</h3>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                program.status === 'active' 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {program.status}
+                              </span>
+                            </div>
+                            <p className="text-gray-600 text-sm mb-3">{program.program_description}</p>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <span className="text-gray-500">Type:</span> {program.program_type}
+                              </div>
+                              <div>
+                                <span className="text-gray-500">Difficulty:</span> {program.difficulty_level}
+                              </div>
+                              <div>
+                                <span className="text-gray-500">Duration:</span> {program.duration_weeks} weeks
+                              </div>
+                              <div>
+                                <span className="text-gray-500">Progress:</span> {program.completion_percentage}%
+                              </div>
+                            </div>
+                            {program.workout_structure && program.workout_structure.length > 0 && (
+                              <div className="mt-3 pt-3 border-t border-gray-200">
+                                <p className="text-sm text-gray-600">
+                                  {program.workout_structure.length} workout days scheduled
+                                </p>
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -189,7 +287,7 @@ function ClientDashboard() {
                       <div className="text-center py-8">
                         <div className="text-gray-400 text-4xl mb-4">📋</div>
                         <h3 className="text-lg font-medium text-gray-900 mb-2">No programs assigned yet</h3>
-                        <p className="text-gray-600">{programs?.message}</p>
+                        <p className="text-gray-600">Your trainer hasn't assigned any programs to you yet.</p>
                       </div>
                     )}
                   </div>
@@ -297,7 +395,14 @@ function ClientDashboard() {
         ) : (
           /* Weekly Exercises Tab */
           <div className="max-w-6xl mx-auto">
-            <WeeklyExerciseView clientId={profile?.client_info.id || 0} />
+            <WeeklyExerciseView 
+              clientId={profile?.client_info.id || 0} 
+              assignedPrograms={programs?.assigned_programs || []}
+              refreshData={async () => {
+                const programsRes = await ClientDashboardService.getClientPrograms();
+                if (programsRes.success) setPrograms(programsRes.data);
+              }}
+            />
           </div>
         )}
       </div>

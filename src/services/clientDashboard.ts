@@ -62,8 +62,32 @@ export class ClientDashboardService {
    */
   static async getClientPrograms() {
     const response = await apiClient.get<{
-      assigned_programs: any[];
-      message: string;
+      assigned_programs: {
+        assignment_id: number;
+        program_id: number;
+        program_name: string;
+        program_description: string;
+        program_type: string;
+        difficulty_level: string;
+        duration_weeks: number;
+        workout_structure: any[];
+        assigned_date: string;
+        start_date: string | null;
+        end_date: string | null;
+        status: string;
+        completion_percentage: number;
+        sessions_completed: number;
+        total_sessions: number | null;
+        custom_notes: string | null;
+        trainer_notes: string | null;
+        trainer_info: {
+          id: number;
+          name: string;
+          email: string;
+          specialization: string | null;
+        };
+      }[];
+      total_assignments: number;
     }>('/api/v1/client-dashboard/programs');
     return response;
   }
