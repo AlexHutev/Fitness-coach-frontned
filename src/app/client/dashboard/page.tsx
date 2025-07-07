@@ -231,18 +231,7 @@ function ClientDashboard() {
                     </div>
                   </div>
                   <div className="p-6">
-                    {/* Debug info */}
-                    {process.env.NODE_ENV === 'development' && (
-                      <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
-                        <div className="text-xs text-yellow-800">
-                          <strong>Debug Info:</strong><br/>
-                          Programs data: {programs ? 'LOADED' : 'NULL'}<br/>
-                          Assigned programs: {programs?.assigned_programs ? `${programs.assigned_programs.length} found` : 'NONE'}<br/>
-                          Profile: {profile ? 'LOADED' : 'NULL'}<br/>
-                          Stats: {stats ? 'LOADED' : 'NULL'}
-                        </div>
-                      </div>
-                    )}
+
                     
                     {programs?.assigned_programs && programs.assigned_programs.length > 0 ? (
                       <div className="space-y-4">
@@ -356,39 +345,7 @@ function ClientDashboard() {
                   </div>
                 )}
 
-                {/* Profile Completion */}
-                {stats?.profile_completion && stats.profile_completion.percentage < 100 && (
-                  <div className="bg-white rounded-lg shadow">
-                    <div className="p-6 border-b border-gray-200">
-                      <h2 className="text-lg font-semibold text-gray-900">Complete Your Profile</h2>
-                    </div>
-                    <div className="p-6">
-                      <div className="mb-4">
-                        <div className="flex justify-between text-sm text-gray-600 mb-2">
-                          <span>Progress</span>
-                          <span>{stats.profile_completion.percentage}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full" 
-                            style={{ width: `${stats.profile_completion.percentage}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-3">
-                        Complete these fields for better program recommendations:
-                      </p>
-                      <ul className="text-sm text-gray-600 space-y-1">
-                        {stats.profile_completion.missing_fields.map((field, index) => (
-                          <li key={index} className="flex items-center">
-                            <span className="w-2 h-2 bg-orange-400 rounded-full mr-2"></span>
-                            {field.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
+
               </div>
             </div>
           </>

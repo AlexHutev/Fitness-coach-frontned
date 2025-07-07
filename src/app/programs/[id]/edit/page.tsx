@@ -196,6 +196,16 @@ function ProgramEditPage() {
       
       console.log('📊 Update data:', updateData);
       
+      // Debug: Check if data can be serialized
+      try {
+        const testSerialization = JSON.stringify(updateData);
+        console.log('✅ Data serialization test passed, size:', testSerialization.length);
+      } catch (serError) {
+        console.error('❌ Data serialization failed:', serError);
+        alert('Data serialization error: ' + serError.message);
+        return;
+      }
+      
       const result = await ProgramService.updateProgram(programId, updateData);
       console.log('✅ Save successful:', result);
       

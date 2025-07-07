@@ -29,6 +29,8 @@ export interface WeeklyExercise {
   // Enriched data
   exercise_name: string;
   exercise_description: string;
+  exercise_video_url?: string;
+  exercise_instructions?: string;
   muscle_groups: string[];
   program_name: string;
   client_name: string;

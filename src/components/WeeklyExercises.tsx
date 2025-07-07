@@ -14,9 +14,11 @@ import {
   Dumbbell,
   Timer,
   Weight,
-  RotateCcw
+  RotateCcw,
+  Info
 } from 'lucide-react';
 import { WeeklyExerciseService, WeeklyExerciseUtils, type WeeklyExercise, type WeeklySchedule } from '@/services/weeklyExercises';
+import ExerciseDetailModal from '@/components/exercise/ExerciseDetailModal';
 
 interface WeeklyExercisesProps {
   clientId: number;
@@ -33,6 +35,7 @@ const WeeklyExercises: React.FC<WeeklyExercisesProps> = ({
   const [currentWeek, setCurrentWeek] = useState<string>('');
   const [selectedExercise, setSelectedExercise] = useState<WeeklyExercise | null>(null);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [feedback, setFeedback] = useState('');
 
   useEffect(() => {
@@ -73,6 +76,11 @@ const WeeklyExercises: React.FC<WeeklyExercisesProps> = ({
     const nextWeek = new Date(currentWeek);
     nextWeek.setDate(nextWeek.getDate() + 7);
     setCurrentWeek(nextWeek.toISOString().split('T')[0]);
+  };
+
+  const handleExerciseClick = (exercise: WeeklyExercise) => {
+    setSelectedExercise(exercise);
+    setShowDetailModal(true);
   };
 
   const handleExerciseAction = async (exercise: WeeklyExercise, action: 'start' | 'complete' | 'skip') => {
@@ -262,6 +270,7 @@ const WeeklyExercises: React.FC<WeeklyExercisesProps> = ({
                     exercise={exercise}
                     isTrainerView={isTrainerView}
                     onAction={handleExerciseAction}
+                    onExerciseClick={handleExerciseClick}
                   />
                 ))}
               </div>
@@ -269,6 +278,18 @@ const WeeklyExercises: React.FC<WeeklyExercisesProps> = ({
           );
         })}
       </div>
+
+      {/* Exercise Detail Modal */}
+      {showDetailModal && selectedExercise && (
+        <ExerciseDetailModal
+          exercise={selectedExercise}
+          isOpen={showDetailModal}
+          onClose={() => {
+            setShowDetailModal(false);
+            setSelectedExercise(null);
+          }}
+        />
+      )}
 
       {/* Feedback Modal */}
       {showFeedbackModal && selectedExercise && (
@@ -321,9 +342,10 @@ interface ExerciseCardProps {
   exercise: WeeklyExercise;
   isTrainerView: boolean;
   onAction: (exercise: WeeklyExercise, action: 'start' | 'complete' | 'skip') => void;
+  onExerciseClick: (exercise: WeeklyExercise) => void;
 }
 
-const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isTrainerView, onAction }) => {
+const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isTrainerView, onAction, onExerciseClick }) => {
   const statusColor = WeeklyExerciseUtils.getStatusColor(exercise.status);
   const statusIcon = WeeklyExerciseUtils.getStatusIcon(exercise.status);
   const exerciseDetails = WeeklyExerciseUtils.formatExerciseDetails(exercise);
@@ -333,7 +355,15 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isTrainerView, on
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center space-x-2 mb-1">
-            <h5 className="font-medium text-gray-900">{exercise.exercise_name}</h5>
+            <button
+              onClick={() => onExerciseClick(exercise)}
+              className="flex items-center space-x-2 hover:text-blue-600 transition-colors group"
+            >
+              <h5 className="font-medium text-gray-900 group-hover:text-blue-600">
+                {exercise.exercise_name}
+              </h5>
+              <Info className="w-4 h-4 text-gray-400 group-hover:text-blue-600" />
+            </button>
             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusColor}`}>
               {statusIcon} {exercise.status.replace('_', ' ')}
             </span>

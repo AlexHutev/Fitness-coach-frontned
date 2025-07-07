@@ -81,15 +81,15 @@ export default function WeeklyAssignment({
     setError('');
     try {
       console.log('🔄 Starting API calls...');
-      const [clientsResponse, exercises] = await Promise.all([
+      const [clientsData, exercises] = await Promise.all([
         ClientService.getClients(),
         ExerciseService.getExercises({ limit: 100 }) // API max limit is 100
       ]);
       console.log('✅ API calls completed');
       
-      if (clientsResponse.data && Array.isArray(clientsResponse.data)) {
-        setClients(clientsResponse.data.filter(client => client.is_active));
-        console.log(`Loaded ${clientsResponse.data.length} clients`);
+      if (clientsData && Array.isArray(clientsData)) {
+        setClients(clientsData.filter(client => client.is_active));
+        console.log(`Loaded ${clientsData.length} clients`);
       }
       
       if (exercises && Array.isArray(exercises)) {

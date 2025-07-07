@@ -60,6 +60,7 @@ class ApiClient {
 
   private getAuthHeaders(): HeadersInit {
     const token = this.getToken();
+    console.log('🔑 Auth token exists:', !!token, token?.substring(0, 20) + '...');
     return {
       'Content-Type': 'application/json',
       ...(token && { Authorization: `Bearer ${token}` }),
@@ -188,15 +189,32 @@ class ApiClient {
 
   public async put<T = unknown>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     try {
+      console.log('🔄 PUT Request:', {
+        url: `${this.baseURL}${endpoint}`,
+        data: data,
+        dataType: typeof data,
+        headers: this.getAuthHeaders()
+      });
+
+      let bodyString;
+      try {
+        bodyString = data ? JSON.stringify(data) : undefined;
+        console.log('📦 Request body length:', bodyString?.length || 0);
+      } catch (stringifyError) {
+        console.error('❌ JSON.stringify error:', stringifyError);
+        throw new Error(`Failed to serialize request data: ${stringifyError.message}`);
+      }
+
       const response = await fetch(`${this.baseURL}${endpoint}`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
-        body: data ? JSON.stringify(data) : undefined,
+        body: bodyString,
       });
       
+      console.log('📡 Response status:', response.status);
       return this.handleResponse<T>(response);
     } catch (error) {
-      console.error('PUT request failed:', error);
+      console.error('💥 PUT request failed:', error);
       
       // Enhanced error handling for CORS and network issues
       if (error instanceof TypeError && error.message.includes('fetch')) {
