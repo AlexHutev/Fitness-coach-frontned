@@ -15,7 +15,8 @@ import {
   Timer,
   Weight,
   RotateCcw,
-  Info
+  Info,
+  XCircle
 } from 'lucide-react';
 import { WeeklyExerciseService, WeeklyExerciseUtils, type WeeklyExercise, type WeeklySchedule } from '@/services/weeklyExercises';
 import ExerciseDetailModal from '@/components/exercise/ExerciseDetailModal';
@@ -35,8 +36,11 @@ const WeeklyExercises: React.FC<WeeklyExercisesProps> = ({
   const [currentWeek, setCurrentWeek] = useState<string>('');
   const [selectedExercise, setSelectedExercise] = useState<WeeklyExercise | null>(null);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [showNotCompletedModal, setShowNotCompletedModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [notCompletedReason, setNotCompletedReason] = useState('');
+  const [notCompletedError, setNotCompletedError] = useState('');
 
   useEffect(() => {
     // Set current week (Monday of this week)
@@ -83,7 +87,7 @@ const WeeklyExercises: React.FC<WeeklyExercisesProps> = ({
     setShowDetailModal(true);
   };
 
-  const handleExerciseAction = async (exercise: WeeklyExercise, action: 'start' | 'complete' | 'skip') => {
+  const handleExerciseAction = async (exercise: WeeklyExercise, action: 'start' | 'complete' | 'skip' | 'not_completed') => {
     try {
       let updatedExercise: WeeklyExercise;
       
@@ -95,6 +99,12 @@ const WeeklyExercises: React.FC<WeeklyExercisesProps> = ({
           setSelectedExercise(exercise);
           setShowFeedbackModal(true);
           return; // Don't update state yet, wait for feedback
+        case 'not_completed':
+          setSelectedExercise(exercise);
+          setShowNotCompletedModal(true);
+          setNotCompletedReason('');
+          setNotCompletedError('');
+          return; // Don't update state yet, wait for reason
         case 'skip':
           updatedExercise = await WeeklyExerciseService.markExerciseSkipped(exercise.id);
           break;
@@ -160,6 +170,50 @@ const WeeklyExercises: React.FC<WeeklyExercisesProps> = ({
     } catch (err) {
       console.error('Error completing exercise:', err);
       alert('Failed to complete exercise. Please try again.');
+    }
+  };
+
+  const handleNotCompletedSubmit = async () => {
+    if (!selectedExercise) return;
+
+    // Validate that reason is provided
+    if (!notCompletedReason.trim()) {
+      setNotCompletedError('Please explain why you could not complete this exercise');
+      return;
+    }
+
+    try {
+      const updatedExercise = await WeeklyExerciseService.markExerciseSkipped(
+        selectedExercise.id,
+        notCompletedReason
+      );
+
+      // Update the exercise in the schedule
+      if (schedule) {
+        const newSchedule = { ...schedule };
+        const dayKey = `day_${selectedExercise.day_number}`;
+        if (newSchedule.days[dayKey]) {
+          newSchedule.days[dayKey] = newSchedule.days[dayKey].map(ex =>
+            ex.id === selectedExercise.id ? updatedExercise : ex
+          );
+          
+          // Recalculate completion stats
+          const allExercises = Object.values(newSchedule.days).flat();
+          const completed = allExercises.filter(ex => ex.status === 'completed').length;
+          newSchedule.completed_exercises = completed;
+          newSchedule.completion_percentage = Math.round((completed / allExercises.length) * 100);
+          
+          setSchedule(newSchedule);
+        }
+      }
+
+      setShowNotCompletedModal(false);
+      setSelectedExercise(null);
+      setNotCompletedReason('');
+      setNotCompletedError('');
+    } catch (err) {
+      console.error('Error marking exercise as not completed:', err);
+      alert('Failed to update exercise. Please try again.');
     }
   };
 
@@ -333,6 +387,61 @@ const WeeklyExercises: React.FC<WeeklyExercisesProps> = ({
           </div>
         </div>
       )}
+
+      {/* Not Completed Modal */}
+      {showNotCompletedModal && selectedExercise && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Could Not Complete: {selectedExercise.exercise_name}
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Please let your trainer know why you couldn't complete this exercise. This helps them adjust your program accordingly.
+            </p>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                What happened? <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={notCompletedReason}
+                onChange={(e) => {
+                  setNotCompletedReason(e.target.value);
+                  if (e.target.value.trim()) setNotCompletedError('');
+                }}
+                rows={4}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
+                  notCompletedError ? 'border-red-500' : 'border-gray-300'
+                }`}
+                placeholder="e.g., Equipment wasn't available, feeling pain in my shoulder, ran out of time..."
+              />
+              {notCompletedError && (
+                <p className="mt-1 text-sm text-red-500">{notCompletedError}</p>
+              )}
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => {
+                  setShowNotCompletedModal(false);
+                  setSelectedExercise(null);
+                  setNotCompletedReason('');
+                  setNotCompletedError('');
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleNotCompletedSubmit}
+                className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+              >
+                Submit & Notify Trainer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -341,7 +450,7 @@ const WeeklyExercises: React.FC<WeeklyExercisesProps> = ({
 interface ExerciseCardProps {
   exercise: WeeklyExercise;
   isTrainerView: boolean;
-  onAction: (exercise: WeeklyExercise, action: 'start' | 'complete' | 'skip') => void;
+  onAction: (exercise: WeeklyExercise, action: 'start' | 'complete' | 'skip' | 'not_completed') => void;
   onExerciseClick: (exercise: WeeklyExercise) => void;
 }
 
@@ -433,10 +542,11 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isTrainerView, on
                 <span>Start</span>
               </button>
               <button
-                onClick={() => onAction(exercise, 'skip')}
-                className="bg-gray-50 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors flex items-center justify-center"
+                onClick={() => onAction(exercise, 'not_completed')}
+                className="bg-orange-50 text-orange-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-orange-100 transition-colors flex items-center justify-center"
+                title="Can't complete this exercise"
               >
-                <SkipForward className="w-3 h-3" />
+                <XCircle className="w-3 h-3" />
               </button>
             </>
           )}
@@ -451,10 +561,11 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isTrainerView, on
                 <span>Complete</span>
               </button>
               <button
-                onClick={() => onAction(exercise, 'skip')}
-                className="bg-gray-50 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors flex items-center justify-center"
+                onClick={() => onAction(exercise, 'not_completed')}
+                className="bg-orange-50 text-orange-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-orange-100 transition-colors flex items-center justify-center"
+                title="Can't complete this exercise"
               >
-                <SkipForward className="w-3 h-3" />
+                <XCircle className="w-3 h-3" />
               </button>
             </>
           )}
@@ -467,20 +578,31 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isTrainerView, on
           )}
           
           {exercise.status === 'skipped' && (
-            <div className="flex-1 bg-red-50 text-red-700 px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center space-x-1">
-              <SkipForward className="w-3 h-3" />
-              <span>Skipped</span>
+            <div className="flex-1 bg-orange-50 text-orange-700 px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center space-x-1">
+              <XCircle className="w-3 h-3" />
+              <span>Not Completed</span>
             </div>
           )}
         </div>
       )}
 
-      {/* Feedback Display */}
+      {/* Client Feedback Display */}
       {exercise.client_feedback && (
-        <div className="mt-3 p-2 bg-blue-50 rounded-lg">
+        <div className={`mt-3 p-2 rounded-lg ${
+          exercise.status === 'skipped' ? 'bg-orange-50' : 'bg-blue-50'
+        }`}>
           <div className="flex items-start space-x-2">
-            <MessageSquare className="w-3 h-3 text-blue-600 mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-blue-800">{exercise.client_feedback}</p>
+            <MessageSquare className={`w-3 h-3 mt-0.5 flex-shrink-0 ${
+              exercise.status === 'skipped' ? 'text-orange-600' : 'text-blue-600'
+            }`} />
+            <div>
+              {exercise.status === 'skipped' && (
+                <p className="text-xs font-medium text-orange-700 mb-1">Reason not completed:</p>
+              )}
+              <p className={`text-xs ${
+                exercise.status === 'skipped' ? 'text-orange-800' : 'text-blue-800'
+              }`}>{exercise.client_feedback}</p>
+            </div>
           </div>
         </div>
       )}

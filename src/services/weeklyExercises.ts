@@ -168,7 +168,7 @@ export const WeeklyExerciseUtils = {
     switch (status) {
       case 'completed': return 'text-green-600 bg-green-100';
       case 'in_progress': return 'text-blue-600 bg-blue-100';
-      case 'skipped': return 'text-red-600 bg-red-100';
+      case 'skipped': return 'text-orange-600 bg-orange-100';
       case 'pending': 
       default: return 'text-gray-600 bg-gray-100';
     }
@@ -179,7 +179,7 @@ export const WeeklyExerciseUtils = {
     switch (status) {
       case 'completed': return '✅';
       case 'in_progress': return '🏃';
-      case 'skipped': return '⏭️';
+      case 'skipped': return '⚠️';
       case 'pending':
       default: return '⏳';
     }

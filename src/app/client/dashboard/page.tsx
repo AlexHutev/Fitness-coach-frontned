@@ -150,7 +150,6 @@ function ClientDashboard() {
           </nav>
         </div>
 
-        {/* Tab Content */}
         {activeTab === 'overview' ? (
           <>
             {/* Quick Stats */}
@@ -355,6 +354,7 @@ function ClientDashboard() {
             <WeeklyExerciseView 
               clientId={profile?.client_info.id || 0} 
               assignedPrograms={programs?.assigned_programs || []}
+              isTrainerView={false}
               refreshData={async () => {
                 const programsRes = await ClientDashboardService.getClientPrograms();
                 if (programsRes.success) setPrograms(programsRes.data);

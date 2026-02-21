@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Bell, User, Settings, LogOut, Menu, X, Dumbbell } from 'lucide-react';
+import { User, Settings, LogOut, Menu, X, Dumbbell } from 'lucide-react';
+import { NotificationDropdown } from '@/components/notifications';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -67,11 +68,10 @@ export default function Header() {
               </div>
             ) : isAuthenticated && user ? (
               <div className="flex items-center space-x-3">
-                {/* Notifications */}
-                <button className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                </button>
+                {/* Notifications - only show for trainers/admins */}
+                {user.role !== 'client' && (
+                  <NotificationDropdown />
+                )}
 
                 {/* Profile Dropdown */}
                 <div className="relative">
@@ -144,8 +144,12 @@ export default function Header() {
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
+          {/* Mobile menu button and notifications */}
+          <div className="md:hidden flex items-center space-x-2">
+            {/* Mobile Notifications - only show for trainers/admins */}
+            {isAuthenticated && user && user.role !== 'client' && (
+              <NotificationDropdown />
+            )}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="p-2 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors"

@@ -391,7 +391,7 @@ function ClientDetailPage() {
 
         {/* Weekly Exercises Tab */}
         {activeTab === 'exercises' && (
-          <WeeklyExerciseView clientId={clientId} />
+          <WeeklyExerciseView clientId={clientId} isTrainerView={true} />
         )}
 
         {/* Progress Tab */}

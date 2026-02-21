@@ -518,3 +518,45 @@ export interface ClientAuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
+
+
+// Notification Types
+export type NotificationType = 
+  | 'workout_completed' 
+  | 'appointment_reminder' 
+  | 'appointment_upcoming' 
+  | 'new_client_assignment' 
+  | 'weekly_exercise_update' 
+  | 'system';
+
+export interface RelatedClientInfo {
+  id: number;
+  first_name: string;
+  last_name: string;
+}
+
+export interface Notification {
+  id: number;
+  user_id: number;
+  title: string;
+  message: string;
+  notification_type: NotificationType;
+  is_read: boolean;
+  is_archived: boolean;
+  created_at: string;
+  read_at?: string;
+  related_client_id?: number;
+  related_appointment_id?: number;
+  related_workout_log_id?: number;
+  related_client?: RelatedClientInfo;
+}
+
+export interface NotificationListResponse {
+  notifications: Notification[];
+  total: number;
+  unread_count: number;
+}
+
+export interface UnreadCountResponse {
+  unread_count: number;
+}
