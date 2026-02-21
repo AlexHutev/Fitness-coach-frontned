@@ -33,6 +33,25 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# Debug and test scripts
+debug_*.html
+test_*.html
+test-*.js
+test_*.js
+*-debug.js
+*-fix-test.js
+*-test.js
+*-simulation.js
+emergency-*.js
+start_*.py
+
+# Temporary markdown guides
+*_FIX.md
+*_IMPLEMENTATION.md
+*_COMPLETE.md
+*_SETUP.md
+*_ERROR_FIX.md
+
 # vercel
 .vercel
 
