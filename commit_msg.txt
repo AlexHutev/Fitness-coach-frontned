@@ -1,0 +1,1 @@
+feat: appointments UI - create, edit, detail pages, client schedule tab, dashboard live data

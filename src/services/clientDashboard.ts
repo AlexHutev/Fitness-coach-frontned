@@ -93,10 +93,13 @@ export class ClientDashboardService {
   }
 
   /**
-   * Get dashboard statistics
+   * Get client's own appointments
    */
-  static async getDashboardStats() {
-    const response = await apiClient.get<ClientDashboardStats>('/api/v1/client-dashboard/dashboard-stats');
+  static async getMyAppointments(upcomingOnly: boolean = false) {
+    const url = upcomingOnly
+      ? '/api/v1/appointments/my?upcoming_only=true'
+      : '/api/v1/appointments/my';
+    const response = await apiClient.get<any[]>(url);
     return response;
   }
 }

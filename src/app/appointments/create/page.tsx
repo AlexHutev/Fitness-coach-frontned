@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth, withTrainerAuth } from '@/context/AuthContext';
 import { ClientService } from '@/services/clients';
+import { appointmentService } from '@/services/appointment';
 import { Client } from '@/types/api';
 import Link from 'next/link';
 import { Calendar, ArrowLeft, Clock, MapPin, User, FileText } from 'lucide-react';
@@ -65,17 +66,32 @@ function CreateAppointmentPage() {
     }
   };
 
+  // Add duration minutes to a datetime-local string (format: "YYYY-MM-DDTHH:mm")
+  // We work purely with the string to avoid timezone offset bugs
+  const addMinutesToLocalString = (localStr: string, minutes: number): string => {
+    if (!localStr) return '';
+    // Parse the local string directly as numbers — no timezone conversion
+    const [datePart, timePart] = localStr.split('T');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hours, mins] = timePart.split(':').map(Number);
+    const totalMinutes = hours * 60 + mins + minutes;
+    const newHours = Math.floor(totalMinutes / 60) % 24;
+    const newMins = totalMinutes % 60;
+    // Handle day overflow (if duration pushes past midnight)
+    const extraDays = Math.floor(totalMinutes / (60 * 24));
+    let newDate = new Date(year, month - 1, day + extraDays);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const newDateStr = `${newDate.getFullYear()}-${pad(newDate.getMonth() + 1)}-${pad(newDate.getDate())}`;
+    return `${newDateStr}T${pad(newHours)}:${pad(newMins)}`;
+  };
+
   const handleDateTimeChange = (field: 'start_time' | 'end_time', value: string) => {
     setFormData(prev => {
       const updated = { ...prev, [field]: value };
-      
-      // Auto-calculate end time if start time changes and duration is set
-      if (field === 'start_time' && prev.duration_minutes && value) {
-        const startDate = new Date(value);
-        const endDate = new Date(startDate.getTime() + prev.duration_minutes * 60000);
-        updated.end_time = endDate.toISOString().slice(0, 16);
+      // Auto-calculate end time whenever start time changes
+      if (field === 'start_time' && value && prev.duration_minutes) {
+        updated.end_time = addMinutesToLocalString(value, prev.duration_minutes);
       }
-      
       return updated;
     });
   };
@@ -83,14 +99,10 @@ function CreateAppointmentPage() {
   const handleDurationChange = (minutes: number) => {
     setFormData(prev => {
       const updated = { ...prev, duration_minutes: minutes };
-      
-      // Auto-calculate end time if start time is set
+      // Recalculate end time if start time is already set
       if (prev.start_time) {
-        const startDate = new Date(prev.start_time);
-        const endDate = new Date(startDate.getTime() + minutes * 60000);
-        updated.end_time = endDate.toISOString().slice(0, 16);
+        updated.end_time = addMinutesToLocalString(prev.start_time, minutes);
       }
-      
       return updated;
     });
   };
@@ -122,12 +134,28 @@ function CreateAppointmentPage() {
 
     setLoading(true);
     try {
-      // For now, just show success message instead of calling API
-      alert('Appointment would be created successfully!');
-      router.push('/dashboard');
-    } catch (error) {
+      // Convert datetime-local strings to ISO without timezone shifting.
+      // datetime-local gives "YYYY-MM-DDTHH:mm" in local time.
+      // Appending ":00" makes it a valid ISO-like string the backend accepts.
+      const toBackendISO = (localStr: string) => localStr.length === 16 ? localStr + ':00' : localStr;
+
+      await appointmentService.createAppointment({
+        client_id: Number(formData.client_id),
+        title: formData.title,
+        description: formData.description || undefined,
+        appointment_type: formData.appointment_type as any,
+        start_time: toBackendISO(formData.start_time),
+        end_time: toBackendISO(formData.end_time),
+        duration_minutes: formData.duration_minutes,
+        location: formData.location || undefined,
+        notes: formData.notes || undefined,
+        status: formData.status as any,
+      });
+      router.push('/appointments');
+    } catch (error: any) {
       console.error('Failed to create appointment:', error);
-      setErrors({ submit: 'Failed to create appointment. Please try again.' });
+      const detail = error?.response?.data?.detail;
+      setErrors({ submit: detail || 'Failed to create appointment. Please try again.' });
     } finally {
       setLoading(false);
     }

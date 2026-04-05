@@ -30,22 +30,18 @@ function DashboardPage() {
   const [activityLoading, setActivityLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch today's appointments (static for now)
+  // Fetch today's appointments from real API
   useEffect(() => {
     const fetchTodaysAppointments = async () => {
       if (!user) { setLoading(false); return; }
       try {
         setLoading(true);
         setError(null);
-        const staticAppointments = [
-          { id: 1, title: "Personal Training - John Smith", appointment_type: "Personal Training", status: "confirmed", start_time: "2025-06-19T09:00:00", end_time: "2025-06-19T10:00:00", location: "Main Gym Floor", duration_minutes: 60, client_id: 1, trainer_id: 2, description: "", notes: "", created_at: "", updated_at: "", client: { id: 1, first_name: "John", last_name: "Smith", email: "john.smith@email.com" } },
-          { id: 2, title: "Program Review - Maria Petrova", appointment_type: "Program Review", status: "confirmed", start_time: "2025-06-19T11:00:00", end_time: "2025-06-19T11:30:00", location: "Consultation Room", duration_minutes: 30, client_id: 2, trainer_id: 2, description: "", notes: "", created_at: "", updated_at: "", client: { id: 2, first_name: "Maria", last_name: "Petrova", email: "maria.petrova@email.com" } },
-          { id: 3, title: "Initial Assessment - Adi Hadzhiev", appointment_type: "Initial Assessment", status: "pending", start_time: "2025-06-19T14:00:00", end_time: "2025-06-19T15:00:00", location: "Assessment Room", duration_minutes: 60, client_id: 3, trainer_id: 2, description: "", notes: "", created_at: "", updated_at: "", client: { id: 3, first_name: "Adi", last_name: "Hadzhiev", email: "adi.hadzhiev@email.com" } },
-          { id: 4, title: "Personal Training - TestClient WithPassword", appointment_type: "Personal Training", status: "confirmed", start_time: "2025-06-19T16:00:00", end_time: "2025-06-19T17:00:00", location: "Main Gym Floor", duration_minutes: 60, client_id: 4, trainer_id: 2, description: "", notes: "", created_at: "", updated_at: "", client: { id: 4, first_name: "TestClient", last_name: "WithPassword", email: "test.client@email.com" } },
-        ];
-        setTodaysAppointments(staticAppointments as Appointment[]);
+        const data = await appointmentService.getTodaysAppointments();
+        setTodaysAppointments(data ?? []);
       } catch {
         setError('Failed to load appointments');
+        setTodaysAppointments([]);
       } finally {
         setLoading(false);
       }

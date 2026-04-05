@@ -6,6 +6,7 @@ import { withAuth } from '@/context/AuthContext';
 import { ClientService } from '@/services/clients';
 import ClientPrograms from '@/components/clients/ClientPrograms';
 import WeeklyExerciseView from '@/components/clients/WeeklyExerciseView';
+import ClientAppointments from '@/components/clients/ClientAppointments';
 import type { Client } from '@/types/api';
 import Link from 'next/link';
 import { 
@@ -137,6 +138,7 @@ function ClientDetailPage() {
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
+    { id: 'schedule', label: 'Schedule', icon: Calendar },
     { id: 'programs', label: 'Programs', icon: Target },
     { id: 'exercises', label: 'Weekly Exercises', icon: Dumbbell },
     { id: 'progress', label: 'Progress', icon: TrendingUp },
@@ -381,6 +383,22 @@ function ClientDetailPage() {
                 <p className="text-gray-700 whitespace-pre-wrap">{client.notes}</p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Schedule Tab */}
+        {activeTab === 'schedule' && (
+          <div className="bg-white rounded-xl shadow-card p-6 border border-gray-100">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-blue-600" />
+                Appointments with {client.first_name} {client.last_name}
+              </h3>
+            </div>
+            <ClientAppointments
+              clientId={clientId}
+              clientName={`${client.first_name} ${client.last_name}`}
+            />
           </div>
         )}
 

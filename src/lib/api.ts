@@ -231,6 +231,19 @@ class ApiClient {
     }
   }
 
+  public async patch<T = unknown>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        method: 'PATCH',
+        headers: this.getAuthHeaders(),
+        body: data ? JSON.stringify(data) : undefined,
+      });
+      return this.handleResponse<T>(response);
+    } catch {
+      return { error: 'Network error occurred', status: 0 };
+    }
+  }
+
   public async delete<T = unknown>(endpoint: string): Promise<ApiResponse<T>> {
     try {
       const response = await fetch(`${this.baseURL}${endpoint}`, {

@@ -13,30 +13,7 @@ import {
   ChevronLeft,
   ChevronRight 
 } from 'lucide-react';
-
-// Simple appointment interface
-interface Appointment {
-  id: number;
-  title: string;
-  appointment_type: string;
-  status: string;
-  start_time: string;
-  end_time: string;
-  location?: string;
-  duration_minutes: number;
-  client_id: number;
-  trainer_id: number;
-  description?: string;
-  notes?: string;
-  created_at: string;
-  updated_at: string;
-  client?: {
-    id: number;
-    first_name: string;
-    last_name: string;
-    email?: string;
-  };
-}
+import { appointmentService, Appointment } from '@/services/appointment';
 
 interface AppointmentFilters {
   page?: number;
@@ -57,144 +34,9 @@ function AppointmentsPage() {
   const fetchAppointments = async () => {
     setLoading(true);
     try {
-      // Use static data for now instead of API call
-      const staticAppointments = [
-        {
-          id: 1,
-          title: "Personal Training - John Smith",
-          appointment_type: "Personal Training",
-          status: "confirmed",
-          start_time: "2025-06-19T09:00:00",
-          end_time: "2025-06-19T10:00:00",
-          location: "Main Gym Floor",
-          duration_minutes: 60,
-          client_id: 1,
-          trainer_id: 2,
-          description: "Upper body strength training session",
-          notes: "Focus on proper form and progressive overload",
-          created_at: "2025-06-19T08:00:00",
-          updated_at: "2025-06-19T08:00:00",
-          client: {
-            id: 1,
-            first_name: "John",
-            last_name: "Smith",
-            email: "john.smith@email.com"
-          }
-        },
-        {
-          id: 2,
-          title: "Program Review - Maria Petrova", 
-          appointment_type: "Program Review",
-          status: "confirmed",
-          start_time: "2025-06-19T11:00:00",
-          end_time: "2025-06-19T11:30:00",
-          location: "Consultation Room",
-          duration_minutes: 30,
-          client_id: 2,
-          trainer_id: 2,
-          description: "Monthly program assessment and adjustments",
-          notes: "Review progress and update program",
-          created_at: "2025-06-19T08:00:00",
-          updated_at: "2025-06-19T08:00:00",
-          client: {
-            id: 2,
-            first_name: "Maria",
-            last_name: "Petrova",
-            email: "maria.petrova@email.com"
-          }
-        },
-        {
-          id: 3,
-          title: "Initial Assessment - Adi Hadzhiev",
-          appointment_type: "Initial Assessment", 
-          status: "pending",
-          start_time: "2025-06-19T14:00:00",
-          end_time: "2025-06-19T15:00:00",
-          location: "Assessment Room",
-          duration_minutes: 60,
-          client_id: 3,
-          trainer_id: 2,
-          description: "Comprehensive fitness assessment for new client",
-          notes: "Include body composition analysis and movement screening",
-          created_at: "2025-06-19T08:00:00",
-          updated_at: "2025-06-19T08:00:00",
-          client: {
-            id: 3,
-            first_name: "Adi",
-            last_name: "Hadzhiev",
-            email: "adi.hadzhiev@email.com"
-          }
-        },
-        {
-          id: 4,
-          title: "Personal Training - TestClient WithPassword",
-          appointment_type: "Personal Training",
-          status: "confirmed", 
-          start_time: "2025-06-19T16:00:00",
-          end_time: "2025-06-19T17:00:00",
-          location: "Main Gym Floor",
-          duration_minutes: 60,
-          client_id: 4,
-          trainer_id: 2,
-          description: "Lower body strength and conditioning",
-          notes: "Focus on compound movements and mobility",
-          created_at: "2025-06-19T08:00:00",
-          updated_at: "2025-06-19T08:00:00",
-          client: {
-            id: 4,
-            first_name: "TestClient",
-            last_name: "WithPassword",
-            email: "test.client@email.com"
-          }
-        },
-        {
-          id: 5,
-          title: "Consultation - New Client Emma",
-          appointment_type: "Consultation",
-          status: "scheduled", 
-          start_time: "2025-06-20T10:00:00",
-          end_time: "2025-06-20T10:30:00",
-          location: "Consultation Room",
-          duration_minutes: 30,
-          client_id: 5,
-          trainer_id: 2,
-          description: "Initial consultation for fitness goals",
-          notes: "Discuss client goals and expectations",
-          created_at: "2025-06-19T08:00:00",
-          updated_at: "2025-06-19T08:00:00",
-          client: {
-            id: 5,
-            first_name: "Emma",
-            last_name: "Wilson",
-            email: "emma.wilson@email.com"
-          }
-        },
-        {
-          id: 6,
-          title: "Group Session - HIIT Training",
-          appointment_type: "Group Session",
-          status: "confirmed", 
-          start_time: "2025-06-20T18:00:00",
-          end_time: "2025-06-20T19:00:00",
-          location: "Studio B",
-          duration_minutes: 60,
-          client_id: 6,
-          trainer_id: 2,
-          description: "High-intensity interval training group class",
-          notes: "Prepare equipment for 8 participants",
-          created_at: "2025-06-19T08:00:00",
-          updated_at: "2025-06-19T08:00:00",
-          client: {
-            id: 6,
-            first_name: "Group",
-            last_name: "Class",
-            email: "group@email.com"
-          }
-        }
-      ];
-
-      setAppointments(staticAppointments);
-      setTotal(staticAppointments.length);
+      const result = await appointmentService.getAppointments({ page: currentPage, size: 10 });
+      setAppointments(result.appointments);
+      setTotal(result.total);
     } catch (error) {
       console.error('Failed to fetch appointments:', error);
     } finally {
@@ -425,13 +267,13 @@ function AppointmentCard({ appointment }: { appointment: Appointment }) {
         
         <div className="flex flex-col space-y-2 ml-6">
           <Link
-            href="/dashboard"
+            href={`/appointments/${appointment.id}`}
             className="btn-secondary text-sm"
           >
             View Details
           </Link>
           <Link
-            href="/appointments/create"
+            href={`/appointments/${appointment.id}/edit`}
             className="btn-primary text-sm"
           >
             Edit
