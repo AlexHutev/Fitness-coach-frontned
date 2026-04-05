@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { withClientAuth } from '@/context/AuthContext';
 import { ClientDashboardService, ClientProfile, ClientDashboardStats } from '@/services/clientDashboard';
 import WeeklyExerciseView from '@/components/clients/WeeklyExerciseView';
+import BodyMetricsProgress from '@/components/clients/BodyMetricsProgress';
 import { Calendar, Clock, MapPin } from 'lucide-react';
 
 function ClientDashboard() {
@@ -13,7 +14,7 @@ function ClientDashboard() {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'schedule' | 'exercises'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'schedule' | 'progress' | 'exercises'>('overview');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -158,6 +159,16 @@ function ClientDashboard() {
               }`}
             >
               My Schedule
+            </button>
+            <button
+              onClick={() => setActiveTab('progress')}
+              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'progress'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              My Progress
             </button>
             <button
               onClick={() => setActiveTab('exercises')}
@@ -445,6 +456,16 @@ function ClientDashboard() {
               )}
             </div>
           </div>
+        ) : activeTab === 'progress' ? (
+          /* Progress Tab */
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <BodyMetricsProgress
+                clientId={profile?.client_info.id || 0}
+                isTrainerView={false}
+              />
+            </div>
+          </div>
         ) : (
           /* Weekly Exercises Tab */
           <div className="max-w-6xl mx-auto">
@@ -454,7 +475,7 @@ function ClientDashboard() {
               isTrainerView={false}
               refreshData={async () => {
                 const programsRes = await ClientDashboardService.getClientPrograms();
-                if (programsRes.success) setPrograms(programsRes.data);
+                if (programsRes.data) setPrograms(programsRes.data);
               }}
             />
           </div>
