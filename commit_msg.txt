@@ -1,1 +1,1 @@
-feat: body metrics progress tracking - recharts, service, component, client and trainer dashboard tabs
+feat: progress tracking steps 2-5 - workout stats, goal milestones, performance PRs, session notes

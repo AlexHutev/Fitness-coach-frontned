@@ -8,6 +8,10 @@ import ClientPrograms from '@/components/clients/ClientPrograms';
 import WeeklyExerciseView from '@/components/clients/WeeklyExerciseView';
 import ClientAppointments from '@/components/clients/ClientAppointments';
 import BodyMetricsProgress from '@/components/clients/BodyMetricsProgress';
+import WorkoutCompletionStats from '@/components/clients/WorkoutCompletionStats';
+import PerformancePRs from '@/components/clients/PerformancePRs';
+import GoalMilestones from '@/components/clients/GoalMilestones';
+import SessionNotes from '@/components/clients/SessionNotes';
 import type { Client } from '@/types/api';
 import Link from 'next/link';
 import { 
@@ -415,29 +419,26 @@ function ClientDetailPage() {
 
         {/* Progress Tab */}
         {activeTab === 'progress' && (
-          <div className="bg-white rounded-xl shadow-card p-6 border border-gray-100">
-            <BodyMetricsProgress clientId={clientId} isTrainerView={true} />
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow-card p-6 border border-gray-100">
+              <GoalMilestones clientId={clientId} isTrainerView={true} />
+            </div>
+            <div className="bg-white rounded-xl shadow-card p-6 border border-gray-100">
+              <WorkoutCompletionStats clientId={clientId} isTrainerView={true} />
+            </div>
+            <div className="bg-white rounded-xl shadow-card p-6 border border-gray-100">
+              <BodyMetricsProgress clientId={clientId} isTrainerView={true} />
+            </div>
+            <div className="bg-white rounded-xl shadow-card p-6 border border-gray-100">
+              <PerformancePRs clientId={clientId} isTrainerView={true} />
+            </div>
           </div>
         )}
 
         {/* Notes Tab */}
         {activeTab === 'notes' && (
-          <div className="bg-white rounded-xl shadow-card p-8 border border-gray-100">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-gray-900">Session Notes</h3>
-              <button className="btn-primary inline-flex items-center space-x-2">
-                <Plus className="w-5 h-5" />
-                <span>Add Note</span>
-              </button>
-            </div>
-            
-            <div className="text-center py-12">
-              <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Session Notes</h3>
-              <p className="text-gray-600">
-                Keep track of session notes, observations, and important reminders.
-              </p>
-            </div>
+          <div className="bg-white rounded-xl shadow-card p-6 border border-gray-100">
+            <SessionNotes clientId={clientId} isTrainerView={true} />
           </div>
         )}
       </div>

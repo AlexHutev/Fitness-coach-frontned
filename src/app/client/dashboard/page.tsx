@@ -5,6 +5,11 @@ import { withClientAuth } from '@/context/AuthContext';
 import { ClientDashboardService, ClientProfile, ClientDashboardStats } from '@/services/clientDashboard';
 import WeeklyExerciseView from '@/components/clients/WeeklyExerciseView';
 import BodyMetricsProgress from '@/components/clients/BodyMetricsProgress';
+import WorkoutCompletionStats from '@/components/clients/WorkoutCompletionStats';
+import PerformancePRs from '@/components/clients/PerformancePRs';
+import GoalMilestones from '@/components/clients/GoalMilestones';
+import SessionNotes from '@/components/clients/SessionNotes';
+
 import { Calendar, Clock, MapPin } from 'lucide-react';
 
 function ClientDashboard() {
@@ -458,12 +463,21 @@ function ClientDashboard() {
           </div>
         ) : activeTab === 'progress' ? (
           /* Progress Tab */
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto space-y-6">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <BodyMetricsProgress
-                clientId={profile?.client_info.id || 0}
-                isTrainerView={false}
-              />
+              <GoalMilestones clientId={profile?.client_info.id || 0} isTrainerView={false} />
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <WorkoutCompletionStats clientId={profile?.client_info.id || 0} isTrainerView={false} />
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <BodyMetricsProgress clientId={profile?.client_info.id || 0} isTrainerView={false} />
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <PerformancePRs clientId={profile?.client_info.id || 0} isTrainerView={false} />
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <SessionNotes clientId={profile?.client_info.id || 0} isTrainerView={false} />
             </div>
           </div>
         ) : (
