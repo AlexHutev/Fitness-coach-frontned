@@ -142,8 +142,8 @@ export default function WorkoutCompletionStats({ clientId, isTrainerView = true 
           <p className="text-sm font-semibold text-gray-700 mb-3">Week-by-Week Rate</p>
           <div className="space-y-2">
             {[...stats.weekly_breakdown].reverse().filter(w => w.total > 0).slice(0, 6).map(w => (
-              <div key={w.week_start} className="flex items-center gap-3">
-                <span className="text-xs text-gray-500 w-16 shrink-0">{w.week_label}</span>
+              <div key={w.week_start} className="flex items-center gap-2">
+                <span className="text-xs text-gray-500 w-14 shrink-0">{w.week_label}</span>
                 <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all"
@@ -153,10 +153,10 @@ export default function WorkoutCompletionStats({ clientId, isTrainerView = true 
                     }}
                   />
                 </div>
-                <span className="text-xs font-medium text-gray-700 w-10 text-right">
+                <span className="text-xs font-medium text-gray-700 w-9 text-right shrink-0">
                   {w.completion_rate}%
                 </span>
-                <span className="text-xs text-gray-400 w-16 shrink-0">
+                <span className="hidden sm:block text-xs text-gray-400 w-16 shrink-0">
                   {w.completed}/{w.total} done
                 </span>
               </div>

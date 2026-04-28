@@ -143,8 +143,8 @@ function ClientDashboard() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="mb-6">
-          <nav className="flex space-x-8" aria-label="Tabs">
+        <div className="mb-6 overflow-x-auto">
+          <nav className="flex space-x-6 min-w-max border-b border-gray-200 pb-0" aria-label="Tabs">
             <button
               onClick={() => setActiveTab('overview')}
               className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${

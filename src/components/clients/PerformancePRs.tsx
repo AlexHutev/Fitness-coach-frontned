@@ -146,16 +146,16 @@ export default function PerformancePRs({ clientId, isTrainerView = true }: Props
             {/* Exercise header row */}
             <button onClick={() => toggleExpand(name)}
               className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
                 <div className="w-9 h-9 bg-yellow-50 rounded-lg flex items-center justify-center shrink-0">
                   <Trophy className="w-4 h-4 text-yellow-500" />
                 </div>
-                <div className="text-left">
-                  <p className="font-semibold text-gray-900">{name}</p>
+                <div className="text-left min-w-0">
+                  <p className="font-semibold text-gray-900 truncate">{name}</p>
                   <p className="text-xs text-gray-400">{recs[0].record_type} · {recs.length} {recs.length === 1 ? 'entry' : 'entries'}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 shrink-0 ml-2">
                 <div className="text-right">
                   <p className="text-xs text-gray-400">Best</p>
                   <p className="text-lg font-bold text-yellow-600">{best.value} <span className="text-sm font-normal text-gray-400">{best.unit}</span></p>
@@ -246,7 +246,7 @@ export default function PerformancePRs({ clientId, isTrainerView = true }: Props
               </div>
 
               {/* Value + Unit */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Value *</label>
                   <input type="number" step="0.5" min="0" value={form.value || ''}

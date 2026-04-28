@@ -350,7 +350,7 @@ export default function BodyMetricsProgress({ clientId, isTrainerView = true }: 
               {/* Core metrics */}
               <div>
                 <p className="text-sm font-medium text-gray-700 mb-2">Core Metrics</p>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {(['weight', 'body_fat_percentage', 'muscle_mass'] as MetricKey[]).map(key => (
                     <div key={key}>
                       <label className="block text-xs text-gray-500 mb-1">{METRIC_CONFIG[key].label} ({METRIC_CONFIG[key].unit})</label>
@@ -366,7 +366,7 @@ export default function BodyMetricsProgress({ clientId, isTrainerView = true }: 
               {/* Body measurements */}
               <div>
                 <p className="text-sm font-medium text-gray-700 mb-2">Body Measurements (cm)</p>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {MEASUREMENT_METRICS.map(key => (
                     <div key={key}>
                       <label className="block text-xs text-gray-500 mb-1">{METRIC_CONFIG[key].label}</label>

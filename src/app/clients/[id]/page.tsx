@@ -213,8 +213,8 @@ function ClientDetailPage() {
 
         {/* Tabs */}
         <div className="mb-8">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
+          <div className="border-b border-gray-200 overflow-x-auto">
+            <nav className="-mb-px flex space-x-6 min-w-max">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}

@@ -222,14 +222,14 @@ export default function GoalMilestones({ clientId, isTrainerView = true }: Props
 
                 {/* Update current value (trainer only) */}
                 {isTrainerView && (
-                  <div className="flex items-center gap-2 mt-3">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-3">
                     <input type="number" step="0.1" placeholder={`Update current (${g.unit})`}
                       value={progressInput[g.id] ?? ''}
                       onChange={e => setProgressInput(prev => ({ ...prev, [g.id]: e.target.value }))}
                       className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" />
                     <button onClick={() => handleUpdateProgress(g)}
                       disabled={updatingId === g.id || !progressInput[g.id]}
-                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors">
+                      className="sm:shrink-0 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition-colors">
                       {updatingId === g.id ? '…' : 'Update'}
                     </button>
                   </div>
@@ -294,7 +294,7 @@ export default function GoalMilestones({ clientId, isTrainerView = true }: Props
               </div>
 
               {/* Type + Metric */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Goal Type</label>
                   <select value={form.goal_type}
@@ -314,7 +314,7 @@ export default function GoalMilestones({ clientId, isTrainerView = true }: Props
               </div>
 
               {/* Values */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Start *</label>
                   <input type="number" step="0.1" value={form.start_value || ''}
@@ -336,7 +336,7 @@ export default function GoalMilestones({ clientId, isTrainerView = true }: Props
               </div>
 
               {/* Dates */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Start Date *</label>
                   <input type="date" value={form.start_date}
