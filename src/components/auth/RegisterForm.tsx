@@ -141,7 +141,7 @@ export default function RegisterForm() {
       };
 
       const success = await register(registrationData);
-      
+
       if (success) {
         // Redirect to dashboard on successful registration
         router.push('/dashboard');
@@ -150,7 +150,13 @@ export default function RegisterForm() {
       }
     } catch (error) {
       console.error('Registration error:', error);
-      setErrors({ submit: 'Registration failed. Please try again.' });
+      // Surface the real backend message (e.g. password validation rules,
+      // duplicate email) instead of a generic placeholder.
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : 'Registration failed. Please try again.';
+      setErrors({ submit: message });
     } finally {
       setIsLoading(false);
     }

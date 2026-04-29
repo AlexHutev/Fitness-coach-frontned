@@ -101,17 +101,17 @@ class ApiClient {
 
   private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
     const status = response.status;
-    
+
     try {
       const data = await response.json();
-      
+
       if (!response.ok) {
         return {
-          error: data.detail || 'An error occurred',
+          error: this.formatErrorDetail(data.detail) || 'An error occurred',
           status,
         };
       }
-      
+
       return {
         data,
         status,
@@ -122,6 +122,33 @@ class ApiClient {
         status,
       };
     }
+  }
+
+  /**
+   * FastAPI returns:
+   *   - a string for HTTPException (`{"detail": "Email already registered"}`)
+   *   - an array of objects for Pydantic validation errors
+   *     (`{"detail": [{"loc": ["body","password"], "msg": "...", ...}]}`)
+   * Flatten both into a single readable string for the UI.
+   */
+  private formatErrorDetail(detail: unknown): string | undefined {
+    if (!detail) return undefined;
+    if (typeof detail === 'string') return detail;
+    if (Array.isArray(detail)) {
+      return detail
+        .map((item) => {
+          if (item && typeof item === 'object' && 'msg' in item) {
+            const loc = Array.isArray((item as { loc?: unknown[] }).loc)
+              ? (item as { loc: unknown[] }).loc.slice(1).join('.')
+              : '';
+            const msg = String((item as { msg: unknown }).msg);
+            return loc ? `${loc}: ${msg}` : msg;
+          }
+          return String(item);
+        })
+        .join('; ');
+    }
+    return String(detail);
   }
 
   public async get<T = unknown>(endpoint: string, options?: { params?: Record<string, unknown> }): Promise<ApiResponse<T>> {
