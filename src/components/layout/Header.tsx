@@ -36,13 +36,7 @@ export default function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
             {isAuthenticated && user ? (
-              user.role === 'client' ? (
-                <>
-                  <NavLink href="/client/dashboard">Dashboard</NavLink>
-                  <NavLink href="/client/programs">My Programs</NavLink>
-                  <NavLink href="/client/progress">Progress</NavLink>
-                </>
-              ) : (
+              user.role === 'client' ? null : (
                 <>
                   <NavLink href="/dashboard">Dashboard</NavLink>
                   <NavLink href="/clients">Clients</NavLink>
@@ -164,19 +158,7 @@ export default function Header() {
           <div className="md:hidden border-t border-gray-200 bg-white">
             <div className="px-2 pt-2 pb-3 space-y-1">
               {isAuthenticated && user ? (
-                user.role === 'client' ? (
-                  <>
-                    <MobileNavLink href="/client/dashboard" onClick={() => setIsMenuOpen(false)}>
-                      Dashboard
-                    </MobileNavLink>
-                    <MobileNavLink href="/client/programs" onClick={() => setIsMenuOpen(false)}>
-                      My Programs
-                    </MobileNavLink>
-                    <MobileNavLink href="/client/progress" onClick={() => setIsMenuOpen(false)}>
-                      Progress
-                    </MobileNavLink>
-                  </>
-                ) : (
+                user.role === 'client' ? null : (
                   <>
                     <MobileNavLink href="/dashboard" onClick={() => setIsMenuOpen(false)}>
                       Dashboard

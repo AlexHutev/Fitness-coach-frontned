@@ -6,6 +6,7 @@ import Link from 'next/link';
 import AssignmentDashboardCard from '@/components/programs/AssignmentDashboardCard';
 import { appointmentService, Appointment } from '@/services/appointment';
 import { NotificationService, Notification } from '@/services/notifications';
+import { DashboardService, TrainerDashboardStats } from '@/services/dashboard';
 import {
   Users,
   Calendar,
@@ -26,6 +27,8 @@ function DashboardPage() {
   const { user } = useAuth();
   const [todaysAppointments, setTodaysAppointments] = useState<Appointment[]>([]);
   const [recentNotifications, setRecentNotifications] = useState<Notification[]>([]);
+  const [stats, setStats] = useState<TrainerDashboardStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [activityLoading, setActivityLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,11 +69,73 @@ function DashboardPage() {
     fetchRecentActivity();
   }, [user]);
 
+  // Fetch trainer dashboard stats (active clients, programs, sessions, progress)
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!user) { setStatsLoading(false); return; }
+      try {
+        setStatsLoading(true);
+        const data = await DashboardService.getTrainerStats();
+        setStats(data);
+      } catch (err) {
+        console.error('Failed to fetch trainer dashboard stats:', err);
+        setStats(null);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+    fetchStats();
+  }, [user]);
+
+  // Build the four stat cards from the live data. While loading, values are
+  // shown as a skeleton dash so the layout stays stable.
   const quickStats = [
-    { title: 'Active Clients', value: '12', change: '+2 this month', icon: Users, color: 'blue', trend: 'up' },
-    { title: 'Programs Created', value: '8', change: '+3 this week', icon: Target, color: 'green', trend: 'up' },
-    { title: 'Sessions This Week', value: '24', change: '6 remaining', icon: Calendar, color: 'purple', trend: 'stable' },
-    { title: 'Client Progress', value: '94%', change: '+5% improvement', icon: TrendingUp, color: 'orange', trend: 'up' },
+    {
+      title: 'Active Clients',
+      value: stats ? String(stats.active_clients.total) : '—',
+      change: stats
+        ? stats.active_clients.delta_this_month > 0
+          ? `+${stats.active_clients.delta_this_month} this month`
+          : 'No new this month'
+        : '',
+      icon: Users,
+      color: 'blue',
+      trend: stats && stats.active_clients.delta_this_month > 0 ? 'up' : 'stable',
+    },
+    {
+      title: 'Programs Created',
+      value: stats ? String(stats.programs.total) : '—',
+      change: stats
+        ? stats.programs.delta_this_week > 0
+          ? `+${stats.programs.delta_this_week} this week`
+          : 'No new this week'
+        : '',
+      icon: Target,
+      color: 'green',
+      trend: stats && stats.programs.delta_this_week > 0 ? 'up' : 'stable',
+    },
+    {
+      title: 'Sessions This Week',
+      value: stats ? String(stats.sessions_this_week.total) : '—',
+      change: stats
+        ? `${stats.sessions_this_week.remaining} remaining`
+        : '',
+      icon: Calendar,
+      color: 'purple',
+      trend: 'stable',
+    },
+    {
+      title: 'Client Progress',
+      value: stats ? `${stats.client_progress.average_percentage}%` : '—',
+      change: stats
+        ? stats.client_progress.average_percentage > 0
+          ? 'Average across active programs'
+          : 'No active programs yet'
+        : '',
+      icon: TrendingUp,
+      color: 'orange',
+      trend: stats && stats.client_progress.average_percentage >= 50 ? 'up' : 'stable',
+    },
   ];
 
   return (
@@ -96,7 +161,9 @@ function DashboardPage() {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {quickStats.map((stat, index) => <StatCard key={index} stat={stat} />)}
+          {quickStats.map((stat, index) => (
+            <StatCard key={index} stat={stat} loading={statsLoading} />
+          ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -251,7 +318,7 @@ function NotificationActivityItem({ notification }: { notification: Notification
 }
 
 // ─── Stat Card ───────────────────────────────────────────────────────────────
-function StatCard({ stat }: { stat: { title: string; value: string; change: string; icon: React.ComponentType<{ className?: string }>; color: string; trend: string; } }) {
+function StatCard({ stat, loading = false }: { stat: { title: string; value: string; change: string; icon: React.ComponentType<{ className?: string }>; color: string; trend: string; }; loading?: boolean }) {
   const Icon = stat.icon;
   const colorClasses = { blue: 'bg-blue-50 text-blue-600', green: 'bg-green-50 text-green-600', purple: 'bg-purple-50 text-purple-600', orange: 'bg-orange-50 text-orange-600' };
   return (
@@ -260,9 +327,17 @@ function StatCard({ stat }: { stat: { title: string; value: string; change: stri
         <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${colorClasses[stat.color as keyof typeof colorClasses]}`}>
           <Icon className="w-6 h-6" />
         </div>
-        <div className={`text-sm font-medium ${stat.trend === 'up' ? 'text-green-600' : stat.trend === 'down' ? 'text-red-600' : 'text-gray-600'}`}>{stat.change}</div>
+        {loading ? (
+          <div className="h-4 w-20 bg-gray-100 rounded animate-pulse" />
+        ) : (
+          <div className={`text-sm font-medium ${stat.trend === 'up' ? 'text-green-600' : stat.trend === 'down' ? 'text-red-600' : 'text-gray-600'}`}>{stat.change}</div>
+        )}
       </div>
-      <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
+      {loading ? (
+        <div className="h-8 w-16 bg-gray-100 rounded animate-pulse mb-2" />
+      ) : (
+        <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
+      )}
       <div className="text-sm text-gray-600">{stat.title}</div>
     </div>
   );

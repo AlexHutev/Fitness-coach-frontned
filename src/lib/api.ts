@@ -36,6 +36,9 @@ export const API_ENDPOINTS = {
   PROGRAM_ASSIGNMENT_PROGRESS: (id: number) => `/api/v1/assignments/${id}/progress`,
   CLIENT_ACTIVE_ASSIGNMENT: (clientId: number) => `/api/v1/programs/clients/${clientId}/active-assignment`,
   
+  // Trainer dashboard
+  TRAINER_DASHBOARD_STATS: '/api/v1/dashboard/trainer-stats',
+
   // Health
   HEALTH: '/api/v1/health',
 } as const;
